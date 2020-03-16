@@ -80,6 +80,8 @@ reportSE <- function(gdx,regionSubsetList=NULL){
   ####### set temporal resolution #####
   prodSe    <- prodSe[,y,]
   storLoss  <- storLoss[,y,]
+  p_macBase <- p_macBase[,y,]
+  #  p_macEmi  <- p_macEmi[,y,]
   ####### fix negative values to 0 ##################
   #### adjust regional dimension of dataoc
   dataoc <- new.magpie(getRegions(prodSe),getYears(dataoc_tmp),magclass::getNames(dataoc_tmp),fill=0)
@@ -269,6 +271,15 @@ reportSE <- function(gdx,regionSubsetList=NULL){
     se.prod(prodSe,dataoc,oc2te,sety,pebio ,se_Solids,te = setdiff(pe2se$all_te, "biotr"), name = "SE|Solids|Biomass (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,pebio ,se_Solids,te = "biotr",         name = "SE|Solids|Traditional Biomass (EJ/yr)")
    )
+  
+    
+#     if("sesofos" %in% sety){
+#       tmp1 <- mbind(tmp1,
+#         se.prod(prodSe,dataoc,oc2te,sety,pety,"sesofos",         name = "SE|Solids|Fossils (EJ/yr)")
+# #        se.prod(prodSe,dataoc,oc2te,sety,pety,"sesobio",         name = "SE|Solids|Biomass (EJ/yr)")
+#       )
+#     }
+  
    if("sepet" %in% sety){
       tmp1 <- mbind(tmp1,
         se.prod(prodSe,dataoc,oc2te,sety,pety,"sepet",                      name = "SE|Liquids|sepet (EJ/yr)"),

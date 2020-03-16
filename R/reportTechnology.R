@@ -50,7 +50,7 @@ reportTechnology <- function(gdx,output=NULL,regionSubsetList=NULL) {
   # use pm_inco0_t for v_investcost for REMIND 1.6 where it was 0 for all non-learning technologies
   for (te in getNames(v_investcost)) {
     for (t in getYears(v_investcost)) {
-       if(v_investcost[,t,te] == 0) {
+       if(all(v_investcost[,t,te] == 0)) {
        v_investcost[,t,te] <- pm_inco0_t[,t,te]
     }
     }

@@ -60,6 +60,8 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   ppfen_ind <- readGDX(gdx,c("ppfen_industry_dyn37","ppfen_industry_dyn28","ppfen_industry"),format="first_found", react = "silent")
   ppfen_stat_build_ind <- c(ppfen_stat,ppfen_build,ppfen_ind)
   
+  p35_bunker_share_in_nonldv_fe <- readGDX(gdx, c("pm_bunker_share_in_nonldv_fe","p35_bunker_share_in_nonldv_fe"),format="first_found")
+  
   esty_build <-  readGDX(gdx,c("esty_dyn36"),format="first_found", react = "silent")
   all_esty       <- readGDX(gdx,name=c("all_esty"),types="sets",format="first_found", react = "silent")
   if(!is.null(all_esty)){
@@ -86,7 +88,8 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   vm_otherFEdemand  <- readGDX(gdx,name=c("vm_otherFEdemand"),field="l",format="first_found")*TWa_2_EJ
   vm_demFeForEs <- readGDX(gdx,name = c("vm_demFeForEs"), field="l", restore_zeros=FALSE,format= "first_found",react = "silent")*TWa_2_EJ
   v_prodEs <- readGDX(gdx,name = c("v_prodEs"), field="l",restore_zeros = F, format = "first_found", react = "silent") * TWa_2_EJ
-
+  vm_prodUe <- readGDX(gdx,name=c("vm_prodUe"),field="l",restore_zeros=FALSE,format="first_found")*TWa_2_EJ
+  
   v33_grindrock_onfield  <- readGDX(gdx,name=c("v33_grindrock_onfield"),field="l",format="first_found",react = "silent")
   if (is.null(v33_grindrock_onfield)){
     v33_grindrock_onfield  <- new.magpie(getRegions(vm_otherFEdemand),getYears(vm_otherFEdemand),rlf,fill=0)
@@ -117,6 +120,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   prodSE <- prodSE[,y,]
   vm_otherFEdemand <- vm_otherFEdemand[,y,]
   v33_grindrock_onfield<- v33_grindrock_onfield[,y,]
+  p35_bunker_share_in_nonldv_fe <- p35_bunker_share_in_nonldv_fe[,y,]
   
   ######## compute sets for summation below ######
   setSolBio <- dplyr::filter_(pe2se, ~all_enty %in% pebio, ~all_enty1 %in% se_Solids)
@@ -398,8 +402,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
         inner_join(var_UE_Industry, c('Data1' = 'pf')) %>% 
         # compute converted values
         group_by(.data$Region, .data$Year, .data$item) %>% 
-        # reverse unit conversion done during loading
-        summarise(Value = sum(.data$Value * .data$factor) / TWa_2_EJ) %>% 
+        summarise(Value = sum(.data$Value * .data$factor)) %>% 
         ungroup() %>% 
         rename(Data1 = .data$item) %>% 
         # back to magpie
@@ -507,6 +510,25 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                   setNames(dimSums(vm_cesIO[,,name_trsp_HDV],dim=3),            "UE|Transport|HDV (EJ/yr)"),
                   NULL
     )
+    
+    # Useful Energy
+    tmp1 <- mbind(tmp1,
+      setNames(dimSums(vm_prodUe,dim=3),      "UE|Transport (EJ/yr)"),
+      # Useful Energy - per energy
+      setNames(dimSums(vm_prodUe[,,c("fepet","fedie")],dim=3), "UE|Transport|+|Liquids (EJ/yr)"),
+      setNames(dimSums(vm_prodUe[,,c("feh2t")],dim=3),         "UE|Transport|+|Hydrogen (EJ/yr)"),
+      setNames(dimSums(vm_prodUe[,,c("feelt")],dim=3),         "UE|Transport|+|Electricity (EJ/yr)"),
+      # Useful Energy - per type
+      setNames(dimSums(vm_prodUe[,,c("apCarPeT","apCarH2T","apCarElT")],dim=3),           "UE|Transport|++|LDV (EJ/yr)"),
+        setNames(dimSums(vm_prodUe[,,c("apCarPeT")],dim=3),                                 "UE|Transport|LDV|+|Liquids (EJ/yr)"),
+        setNames(dimSums(vm_prodUe[,,c("apCarH2T")],dim=3),                                 "UE|Transport|LDV|+|Hydrogen (EJ/yr)"),
+        setNames(dimSums(vm_prodUe[,,c("apCarElT")],dim=3),                                 "UE|Transport|LDV|+|Electricity (EJ/yr)"),
+      setNames(dimSums(vm_prodUe[,,c("apCarDiT","apcarDiEffT","apcarDiEffH2T")],dim=3),   "UE|Transport|++|HDV (EJ/yr)"),
+        setNames(dimSums(vm_prodUe[,,c("apCarDiT","apcarDiEffT","apcarDiEffH2T")],dim=3),   "UE|Transport|HDV|+|Liquids (EJ/yr)"),
+      setNames(dimSums(vm_prodUe[,,c("apTrnElT")],dim=3),                                 "UE|Transport|++|Electric Trains (EJ/yr)"),
+        setNames(dimSums(vm_prodUe[,,c("apTrnElT")],dim=3),                                 "UE|Transport|Electric Trains|+|Electricity (EJ/yr)")
+    )
+    
   }
   if (tran_mod == "edge_esm") {
     ## define the set that contains fe2es for transport
@@ -625,6 +647,11 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
 
   if (tran_mod == "complex") {  
     tmp2 <- mbind(tmp2a,
+                  setNames(
+                    tmp1[,,"FE|Transport|Pass|Train|Electricity (EJ/yr)"] 
+                    + tmp1[,,"FE|Transport|Pass|Road|LDV|Electricity (EJ/yr)"], 
+                    "FE|Transport|Pass|Electricity (EJ/yr)"),
+                  setNames(tmp1[,,"FE|Transport|Pass|Road|LDV|Hydrogen (EJ/yr)"], "FE|Transport|Pass|Hydrogen (EJ/yr)"),
                   setNames(p35_pass_FE_share_transp * tmp1[,, "FE|Transport|non-LDV (EJ/yr)"], "FE|Transport|Pass|non-LDV (EJ/yr)"),
                   setNames((1- p35_pass_FE_share_transp) * tmp1[,, "FE|Transport|non-LDV (EJ/yr)"], "FE|Transport|Freight (EJ/yr)"),
                   setNames(p35_pass_FE_share_transp * tmp1[,, "UE|Transport|HDV (EJ/yr)"], "UE|Transport|Pass|non-LDV (EJ/yr)"),
@@ -683,7 +710,23 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                 setNames(tmp4[,,"FE|Transport|Liquids (EJ/yr)"] + tmp4[,,"FE|Transport|Hydrogen (EJ/yr)"], "FE|Transport|Fuels (EJ/yr)"),
                 setNames(tmp4[,,"FE (EJ/yr)"] - tmp4[,,"FE|+|Electricity (EJ/yr)"] - tmp4[,,"FE|+|Heat (EJ/yr)"], "FE|Fuels (EJ/yr)") 
   )
-  out <- tmp5
+  
+  #creating variables without bunkers
+  if (tran_mod == "complex"){
+    tmp6 <- mbind(tmp5,
+                   setNames(p35_bunker_share_in_nonldv_fe* tmp5[,,"FE|Transport|Freight (EJ/yr)"], "FE|Transport|Bunkers (EJ/yr)")
+                  )
+    tmp7 <- mbind(tmp6,
+                  setNames(tmp6[,,"FE|Transport (EJ/yr)"] - tmp6[,,"FE|Transport|Bunkers (EJ/yr)"], "FE|Transport w/o Bunkers (EJ/yr)"),
+                  setNames(tmp6[,,"FE|Transport|Freight (EJ/yr)"] - tmp6[,,"FE|Transport|Bunkers (EJ/yr)"], "FE|Transport|Freight w/o Bunkers (EJ/yr)"),
+                  setNames(tmp6[,,"FE|Transport|Liquids (EJ/yr)"] - tmp6[,,"FE|Transport|Bunkers (EJ/yr)"], "FE|Transport|Liquids w/o Bunkers (EJ/yr)")
+                  )
+  } else {
+    tmp7 <- tmp5
+  }
+                
+  out <- tmp7
+                 
   # add global values
   out <- mbind(out,dimSums(out,dim=1))
   # add other region aggregations
