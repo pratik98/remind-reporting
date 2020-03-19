@@ -37,19 +37,41 @@ compareScenarios <- function(mif, hist,
                              sr15marker_RCP=NULL) {
 
   lineplots_perCap <- function(data, vars, percap_factor, ylabstr,
-                               global=FALSE, per_gdp=FALSE, histdata=NULL){
+                               global=FALSE, mainReg1=mainReg, per_gdp=FALSE, histdata=NULL){
+
+    ## models for historical data
+    histmap = list(
+      "Population"="WDI",
+      "GDP|PPP"="James_IMF",
+      "FE"="IEA",
+      "FE|Transport"="IEA",
+      "FE|Buildings"="IEA",
+      "FE|Industry"="IEA"
+    )
+
     items <- c(vars,
                "Population (million)",
                "GDP|PPP (billion US$2005/yr)")
     var <- as.data.table(as.quitte(data[,, items]))[, "unit" := NULL]
 
+    plain_items <- gsub("(.+) \\(.+\\)", "\\1", items)
+
     if(!is.null(histdata)){
-      if(all(items %in% getNames(histdata, dim=3))){
-        hist_dt <- as.data.table(as.quitte(histdata[,, items]))
-        varhist <- hist_dt[model == "James_IMF"][, c("unit", "model") := list(NULL, "REMIND")]
-        var <- rbind(var, varhist)
+      if(!all(items %in% getNames(histdata, dim=3))){
+        missing <- items[!items %in% getNames(histdata, dim=3)]
+        stop(paste("Items missing in historical dataset:",
+                   paste(missing, collapse=", ")))
+      }else if(!all(plain_items %in% names(histmap))){
+        missing <- items[!plain_items %in% names(histmap)]
+        stop(paste("No model defined for item in historical dataset:",
+                   paste(missing, collapse=", ")))
       }else{
-        print(sprintf("Items %s not found in historical data.", items))
+        hist_dt <- as.data.table(as.quitte(histdata[,, items]))
+        models <- unlist(histmap[plain_items])
+        varhist <- hist_dt[
+          model %in% models][ # IEA: energy, IMF: GDP, WDI: Population
+          , c("unit", "model") := list(NULL, "REMIND")]
+        var <- rbind(var, varhist)
       }
     }
 
@@ -85,18 +107,18 @@ compareScenarios <- function(mif, hist,
     if(per_gdp){
       if(global){
         p <- ggplot() +
-          geom_line(data=var[scenario != "historical" & region == "GLO"],
+          geom_line(data=var[scenario != "historical" & region == mainReg1],
                     aes(x=`GDP|PPP`, y=value, linetype=scenario)) +
-          geom_point(data=var[scenario == "historical" & region == "GLO"],
+          geom_point(data=var[scenario == "historical" & region == mainReg1],
                      aes(x=`GDP|PPP`, y=value), shape=4) +
-          geom_point(data=highlights[region == "GLO"], aes(x=`GDP|PPP`, y=value), shape=1)
+          geom_point(data=highlights[region == mainReg1], aes(x=`GDP|PPP`, y=value), shape=1)
       }else{
         p <- ggplot() +
-          geom_line(data=var[scenario != "historical" & region != "GLO"],
+          geom_line(data=var[scenario != "historical" & region != mainReg1],
                     aes(x=`GDP|PPP`, y=value, linetype=scenario, color=region)) +
-          geom_point(data=var[scenario == "historical" & region != "GLO"],
+          geom_point(data=var[scenario == "historical" & region != mainReg1],
                      aes(x=`GDP|PPP`, y=value, color=region), shape=4) +
-          geom_point(data=highlights[region != "GLO"], aes(x=`GDP|PPP`, y=value, color=region), shape=1) +
+          geom_point(data=highlights[region != mainReg1], aes(x=`GDP|PPP`, y=value, color=region), shape=1) +
           scale_color_manual(values = reg_cols,  labels = reg_labels)
       }
 
@@ -109,15 +131,15 @@ compareScenarios <- function(mif, hist,
     }else{
       if(global){
         p <- ggplot() +
-          geom_line(data=var[scenario != "historical" & region == "GLO"],
+          geom_line(data=var[scenario != "historical" & region == mainReg1],
                     aes(x=period, y=value, linetype=scenario)) +
-          geom_point(data=var[scenario == "historical" & region == "GLO"],
+          geom_point(data=var[scenario == "historical" & region == mainReg1],
                      aes(x=period, y=value), shape=4)
       }else{
         p <- ggplot() +
-          geom_line(data=var[scenario != "historical" & region != "GLO"],
+          geom_line(data=var[scenario != "historical" & region != mainReg1],
                     aes(x=period, y=value, linetype=scenario, color=region)) +
-          geom_point(data=var[scenario == "historical" & region != "GLO"],
+          geom_point(data=var[scenario == "historical" & region != mainReg1],
                      aes(x=period, y=value, color=region), shape=4) +
           scale_color_manual(values = reg_cols,  labels = reg_labels)
       }
@@ -369,19 +391,19 @@ compareScenarios <- function(mif, hist,
             "FE|Industry (EJ/yr)")
   var <- data[,,intersect(items, getNames(data,dim=3))]/data[,, "Population", pmatch=T]*1e3
 
-  p <- mipArea(var["GLO",,], scales="free_y")
+  p <- mipArea(var[mainReg,,], scales="free_y")
   p <- p + theme(legend.position="none") + ylab("FE p. Cap. (GJ/yr)")
   swfigure(sw,print,p,sw_option="height=3.5,width=7")
 
-  p <- mipBarYearData(var["GLO",y_bar,])
+  p <- mipBarYearData(var[mainReg,y_bar,])
   p <- p + theme(legend.position="none") + ylab("FE p. Cap. (GJ/yr)")
   swfigure(sw,print,p,sw_option="height=4.5,width=7")
 
-  p <- mipBarYearData(var[,y_bar,]["GLO",,,invert=TRUE]) + ylab("FE p. Cap. (GJ/yr)")
+  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE]) + ylab("FE p. Cap. (GJ/yr)")
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
   swlatex(sw,"\\onecolumn")
-  p <- mipArea(var["GLO",,,invert=TRUE],scales="free_y") + ylab("FE p. Cap. (GJ/yr)")
+  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y") + ylab("FE p. Cap. (GJ/yr)")
   swfigure(sw,print,p,sw_option="height=8,width=16")
   swlatex(sw,"\\twocolumn")
 
@@ -396,7 +418,12 @@ compareScenarios <- function(mif, hist,
     "FE|Buildings (EJ/yr)",
     "FE|Industry (EJ/yr)")
 
-  p <- lineplots_perCap(data, items, 1e3, "FE per Cap. (GJ/yr)", global=T, histdata=hist)
+  p <- lineplots_perCap(
+    data=data,
+    vars=items,
+    percap_factor=1e3,
+    ylabstr="FE per Cap. (GJ/yr)",
+    global=T, histdata=hist)
 
   if("sr15data" %in% rownames(installed.packages()) & is.character(sr15marker_RCP)){
 
@@ -410,7 +437,7 @@ compareScenarios <- function(mif, hist,
       "Population")
     sr15dt <- as.data.table(sr15data::sr15data)[
       region == "World"][
-    , region := "GLO"][
+    , region := mainReg][
       data.table(period=y), on="period"]
     sr15scens <- data.table(scenario=paste0("SSP", 1:5, "-", sr15marker_RCP),
                             model=c("IMAGE 3.0.1",
@@ -865,16 +892,16 @@ compareScenarios <- function(mif, hist,
                          ylab='GDP|PPP [billion US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
-  swlatex(sw,"\\subsection{GDP - PPP per Capita}")
-  gdpcap <- data[,,"GDP|PPP (billion US$2005/yr)"]/data[,,"Population (million)"]*1e3
-  gdpcap_hist <- collapseNames(hist[,,"GDP|PPP (billion US$2005/yr)"]/hist[,,"Population (million)"]*1e3, collapsedim=4)
-
-  p <- mipLineHistorical(gdpcap[mainReg,,], x_hist=gdpcap_hist[mainReg,,],
-                         ylab='GDP|PPP per Cap. [US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(gdpcap[mainReg,,,invert=TRUE],x_hist=gdpcap_hist[mainReg,,,invert=TRUE],
-                         ylab='GDP|PPP per Cap. [US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
+  # swlatex(sw,"\\subsection{GDP - PPP per Capita}")
+  # gdpcap <- data[,,"GDP|PPP (billion US$2005/yr)"]/data[,,"Population (million)"]*1e3
+  # gdpcap_hist <- collapseNames(hist[,,"GDP|PPP (billion US$2005/yr)"]/hist[,,"Population (million)"]*1e3, collapsedim=4)
+  # 
+  # p <- mipLineHistorical(gdpcap[mainReg,,], x_hist=gdpcap_hist[mainReg,,],
+  #                        ylab='GDP|PPP per Cap. [US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  # swfigure(sw,print,p,sw_option="height=8,width=8")
+  # p <- mipLineHistorical(gdpcap[mainReg,,,invert=TRUE],x_hist=gdpcap_hist[mainReg,,,invert=TRUE],
+  #                        ylab='GDP|PPP per Cap. [US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  # swfigure(sw,print,p,sw_option="height=9,width=8")
 
   swlatex(sw,"\\subsection{Capital Stock}")
   p <- mipLineHistorical(data[mainReg,,"Capital Stock|Non-ESM (billion US$2005)"],x_hist=NULL,
@@ -1127,19 +1154,19 @@ compareScenarios <- function(mif, hist,
   gdp <- mselect(data, variable="GDP|PPP (billion US$2005/yr)")
   var <- data[,,intersect(items, getNames(data,dim=3))]/gdp*1e3 # EJ/bil.$ -> GJ/$ -> 1e3 MJ/$
 
-  p <- mipArea(var["GLO",,], scales="free_y")
+  p <- mipArea(var[mainReg,,], scales="free_y")
   p <- p + theme(legend.position="none") + ylab("FE int. of GDP (MJ/US$2005)")
   swfigure(sw,print,p,sw_option="height=3.5,width=7")
 
-  p <- mipBarYearData(var["GLO",y_bar,])
+  p <- mipBarYearData(var[mainReg,y_bar,])
   p <- p + theme(legend.position="none") + ylab("FE int. of GDP (MJ/US$2005)")
   swfigure(sw,print,p,sw_option="height=4.5,width=7")
 
-  p <- mipBarYearData(var[,y_bar,]["GLO",,,invert=TRUE]) + ylab("FE int. of GDP (MJ/US$2005)")
+  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE]) + ylab("FE int. of GDP (MJ/US$2005)")
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
   swlatex(sw,"\\onecolumn")
-  p <- mipArea(var["GLO",,,invert=TRUE],scales="free_y") + ylab("FE int. of GDP (MJ/US$2005)")
+  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y") + ylab("FE int. of GDP (MJ/US$2005)")
   swfigure(sw,print,p,sw_option="height=8,width=16")
   swlatex(sw,"\\twocolumn")
 
@@ -1183,11 +1210,11 @@ compareScenarios <- function(mif, hist,
   dt <- dt[value > 0]
 
   p <- ggplot() +
-    geom_line(data=dt[scenario != "historical" & region != "GLO"],
+    geom_line(data=dt[scenario != "historical" & region != mainReg],
               aes(x=GDPpC, y=value, linetype=scenario, color=region)) +
-    geom_point(data=dt[scenario == "historical" & region != "GLO"],
+    geom_point(data=dt[scenario == "historical" & region != mainReg],
                aes(x=GDPpC, y=value, color=region), shape=4) +
-    geom_point(data=highlights[region != "GLO"], aes(x=`GDPpC`, y=value, color=region), shape=1) +
+    geom_point(data=highlights[region != mainReg], aes(x=`GDPpC`, y=value, color=region), shape=1) +
     facet_wrap(~ variable, scales="free_y") +
     ylab("FE Intensity (MJ/US$2005)") +
     xlab("GDP PPP per Cap. (kUS$2005)") +
@@ -1264,17 +1291,17 @@ compareScenarios <- function(mif, hist,
                          ylab='Emi|CO2|Energy|Supply|Electricity [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
-  p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],
+  p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=NULL,
                          ylab='Emi|CO2|Gross Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],
+  p <- mipLineHistorical(data[,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Emi|CO2|Gross Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
-  p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],
+  p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=NULL,
                          ylab='Emi|CO2|Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],
+  p <- mipLineHistorical(data[,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Emi|CO2|Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
