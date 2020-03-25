@@ -416,7 +416,7 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
   
   tmp1 <- setNames(output[,,"Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"] + 
                      output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Electricity|w/ couple prod (Mt CO2/yr)"],
-                   "Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)") 
+                  "Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)") 
 
   tmp2 <- setNames(output[,,"Emi|CO2|Fossil Fuels and Industry|Energy Supply (Mt CO2/yr)"] +
                      output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|w/ couple prod (Mt CO2/yr)"] -
@@ -444,7 +444,8 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
                setNames(cumulatedValue(tmp[,,"Emi|CO2|Buildings|Direct (Mt CO2/yr)"]), "Emi|CO2|Buildings|Direct|Cumulated (Mt CO2/yr)")
   )
 
-  tmp <- mbind(tmp, tmp1, tmp2, tmp3, tmp4, tmp5)
+  tmp <- mbind(tmp, #tmp1,
+               tmp2, tmp3, tmp4, tmp5)
   
   tmp6 <- mbind(tmp,
                 setNames(output[,,"Emi|CO2|Transport|Demand (Mt CO2/yr)"] / output[,,"FE|Transport|Fuels (EJ/yr)"], "FE|Transport|Fossil Carbon Intensity of fuels (kg CO2/GJ)"),
