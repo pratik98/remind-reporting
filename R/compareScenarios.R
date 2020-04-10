@@ -727,11 +727,11 @@ compareScenarios <- function(mif, hist,
   p <- mipLineHistorical(data[mainReg,,"Price|Carbon (US$2005/t CO2)"],x_hist=NULL,
                          ylab='Price|Carbon [US$2005/t CO2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=3.5,width=7")
-  p <- mipLineHistorical(data[mainReg,,"Price|Carbon (US$2005/t CO2)"],x_hist=NULL,
-                         ylab='Price|Carbon_log [US$2005/t CO2]',ybreaks=c(20,30,40,50,60,75,100,200,500,1000,2000,3000),
-                         ylim=c(0,3000),ylog=TRUE)
-  swfigure(sw,print,p,sw_option="height=4.5,width=7")
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  #p <- mipLineHistorical(data[mainReg,,"Price|Carbon (US$2005/t CO2)"],x_hist=NULL,
+  #                       ylab='Price|Carbon_log [US$2005/t CO2]',ybreaks=c(20,30,40,50,60,75,100,200,500,1000,2000,3000),
+  #                       ylim=c(0,3000),ylog=TRUE)
+  #swfigure(sw,print,p,sw_option="height=4.5,width=7")
   p <- mipLineHistorical(data[,,"Price|Carbon (US$2005/t CO2)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Price|Carbon [US$2005/t CO2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
@@ -748,26 +748,26 @@ compareScenarios <- function(mif, hist,
     facet.dim="scenario",
     facet.ncol=2) +
     theme(legend.position="right")
-
   swfigure(sw,print,p,sw_option="height=9,width=16")
   
+  swlatex(sw,"\\twocolumn")
   p <- mipLineHistorical(data[mainReg,,"Price|Carbon|ETS (US$2005/t CO2)"],x_hist=NULL,
-                         ylab='Price|Carbon|ETS [US$2005/t CO2]',ybreaks=c(20,30,40,50,60,75,100,200,500,1000,2000,3000),
-                         ylim=c(0,3000),ylog=TRUE)
-  swfigure(sw,print,p,sw_option="height=4.5,width=7")
+                         ylab='Price|Carbon|ETS [US$2005/t CO2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  p <- p + theme(legend.position="none")
+  swfigure(sw,print,p,sw_option="height=8,width=8")
   p <- mipLineHistorical(data[,,"Price|Carbon|ETS (US$2005/t CO2)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Price|Carbon|ETS [US$2005/t CO2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
   
-  
+  swlatex(sw,"\\twocolumn")
   p <- mipLineHistorical(data[mainReg,,"Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)"],x_hist=NULL,
                          ylab='Price|Carbon|National Climate Target Non-ETS [US$2005/t CO2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=3.5,width=7")
-  p <- mipLineHistorical(data[mainReg,,"Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)"],x_hist=NULL,
-                         ylab='Price|Carbon|National Climate Target Non-ETS [US$2005/t CO2]',ybreaks=c(20,30,40,50,60,75,100,200,500,1000,2000,3000),
-                         ylim=c(0,3000),ylog=TRUE)
-  swfigure(sw,print,p,sw_option="height=4.5,width=7")
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  # p <- mipLineHistorical(data[mainReg,,"Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)"],x_hist=NULL,
+  #                        ylab='Price|Carbon|National Climate Target Non-ETS [US$2005/t CO2]',ybreaks=c(20,30,40,50,60,75,100,200,500,1000,2000,3000),
+  #                        ylim=c(0,3000),ylog=TRUE)
+  # swfigure(sw,print,p,sw_option="height=4.5,width=7")
   p <- mipLineHistorical(data[,,"Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Price|Carbon|National Climate Target Non-ETS [US$2005/t CO2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
@@ -2760,13 +2760,13 @@ compareScenarios <- function(mif, hist,
 
   ## ---- ++++ C L I M A T E ++++ ----
 
-  swlatex(sw,"\\section{Climate}")
-
-  swfigure(sw,mipLineHistorical,data[,,"Forcing (W/m2)"],x_hist=NULL,
-           ylab='Forcing [W/m2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
-
-  swfigure(sw,mipLineHistorical,data[,,"Temperature|Global Mean (K)"],x_hist=NULL,
-           ylab='Temperature|Global Mean [K]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
+  # swlatex(sw,"\\section{Climate}")
+  # 
+  # swfigure(sw,mipLineHistorical,data[,,"Forcing (W/m2)"],x_hist=NULL,
+  #          ylab='Forcing [W/m2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
+  # 
+  # swfigure(sw,mipLineHistorical,data[,,"Temperature|Global Mean (K)"],x_hist=NULL,
+  #          ylab='Temperature|Global Mean [K]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
 
   ## Close output-pdf
   swclose(sw)

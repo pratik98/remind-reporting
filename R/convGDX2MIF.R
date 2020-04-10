@@ -48,7 +48,7 @@ convGDX2MIF <- function(gdx,gdx_ref=NULL,file=NULL,scenario="default",t=c(seq(20
   # reporting of variables that need variables from different other report functions
   output <- mbind(output,reportEmi(gdx,output,regionSubsetList)[,t,])    # needs output from reportFE
   output <- mbind(output,reportTechnology(gdx,output,regionSubsetList)[,t,])    # needs output from reportSE
-  output <- mbind(output,reportPrices(gdx,output,regionSubsetList)[,t,]) # needs output from reportSE, reportFE, reportEmi, reportExtraction, reportMacroEconomy  
+  output <- mbind(output,reportPrices(gdx,gdx_ref,output,regionSubsetList)[,t,]) # needs output from reportSE, reportFE, reportEmi, reportExtraction, reportMacroEconomy  
   output <- mbind(output,reportCosts(gdx,output,regionSubsetList)[,t,])  # needs output from reportEnergyInvestment, reportPrices, reportEnergyInvestments
 
   # reporting of cross variables - needs variables from different other report* functions

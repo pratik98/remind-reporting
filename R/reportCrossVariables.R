@@ -213,7 +213,7 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
                 / output[,,"GDP|MER (billion US$2005/yr)"],                 "Intensity|GDP|CO2 (Mt CO2-equiv/US$2005)"))
   tmp <- mbind(tmp,setNames(
                   output[,,"Emi|GHGtot (Mt CO2-equiv/yr)"]
-                / output[,,"FE (EJ/yr)"],                 "Intensity|Final Energy|CO2 (Mt CO2-equiv/EJ)"))
+                / output[,,"FE (EJ/yr)"],                 "Intensity|Final Energy|CO2-equiv (Mt CO2-equiv/EJ)"))
   tmp <- mbind(tmp,setNames(
                   output[,,"GDP|MER (billion US$2005/yr)"]
                 / output[,,"Population (million)"],                 "GDP|per capita|MER (kUS$2005/per capita)"))
@@ -291,14 +291,14 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
     int_gr[,t,"Intensity Growth|Final Energy|CO2-equiv (% pa)"] <- 
       ( 
         ( 
-          (tmp[,t,"Intensity|Final Energy|CO2 (Mt CO2-equiv/EJ)"] / setYears(tmp[,(which(getYears(tmp)==t)-1),"Intensity|Final Energy|CO2 (Mt CO2-equiv/EJ)"],t))
+          (tmp[,t,"Intensity|Final Energy|CO2-equiv (Mt CO2-equiv/EJ)"] / setYears(tmp[,(which(getYears(tmp)==t)-1),"Intensity|Final Energy|CO2-equiv (Mt CO2-equiv/EJ)"],t))
           ^ (1 / ( getYears(tmp[,t,],as.integer=TRUE) - getYears(tmp[,(which(getYears(tmp)==t)-1),],as.integer=TRUE) ) )
         ) - 1
       ) * 100
     int_gr[,t,"Intensity Growth|Final Energy|CO2-equiv to 2005 (% pa)"] <- 
       ( 
         ( 
-          (tmp[,t,"Intensity|Final Energy|CO2 (Mt CO2-equiv/EJ)"] / setYears(tmp[,2005,"Intensity|Final Energy|CO2 (Mt CO2-equiv/EJ)"],t))
+          (tmp[,t,"Intensity|Final Energy|CO2-equiv (Mt CO2-equiv/EJ)"] / setYears(tmp[,2005,"Intensity|Final Energy|CO2-equiv (Mt CO2-equiv/EJ)"],t))
           ^ (1 / ( getYears(tmp[,t,],as.integer=TRUE) - 2005 ) )
         ) - 1
       ) * 100
@@ -438,14 +438,14 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
   
   # calculate cumulative values
   tmp <- mbind(tmp, 
-               setNames(cumulatedValue(tmp2[,,"Emi|CO2|Energy|Supply|Non-Elec (Mt CO2/yr)"]), "Emi|CO2|Energy|Supply|Non-Elec|Cumulated (Mt CO2/yr)"),
-               setNames(cumulatedValue(tmp1[,,"Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)"]), "Emi|CO2|Energy|Supply|Electricity|Gross|Cumulated (Mt CO2/yr)"),
+  #             setNames(cumulatedValue(tmp2[,,"Emi|CO2|Energy|Supply|Non-Elec (Mt CO2/yr)"]), "Emi|CO2|Energy|Supply|Non-Elec|Cumulated (Mt CO2/yr)"),
+  #             setNames(cumulatedValue(tmp1[,,"Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)"]), "Emi|CO2|Energy|Supply|Electricity|Gross|Cumulated (Mt CO2/yr)"),
                setNames(cumulatedValue(tmp3[,,"Emi|CO2|Energy|Demand|Industry|Gross (Mt CO2/yr)"]), "Emi|CO2|Energy|Demand|Industry|Gross|Cumulated (Mt CO2/yr)"),
                setNames(cumulatedValue(tmp[,,"Emi|CO2|Buildings|Direct (Mt CO2/yr)"]), "Emi|CO2|Buildings|Direct|Cumulated (Mt CO2/yr)")
   )
 
-  tmp <- mbind(tmp, #tmp1,
-               tmp2, tmp3, tmp4, tmp5)
+  tmp <- mbind(tmp, #tmp1, tmp2,tmp4, , tmp5
+               tmp3)
   
   tmp6 <- mbind(tmp,
                 setNames(output[,,"Emi|CO2|Transport|Demand (Mt CO2/yr)"] / output[,,"FE|Transport|Fuels (EJ/yr)"], "FE|Transport|Fossil Carbon Intensity of fuels (kg CO2/GJ)"),
