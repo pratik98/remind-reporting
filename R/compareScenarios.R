@@ -284,6 +284,7 @@ compareScenarios <- function(mif, hist,
   var <- mbind(var,data[,,"Emi|N2O|Energy Supply and Demand (kt N2O/yr)"]          *GWP["N2O"]/1000)
   var <- mbind(var,data[,,"Emi|N2O|Waste (kt N2O/yr)"]                             *GWP["N2O"]/1000)
   var <- mbind(var,data[,,"Emi|N2O|Industry (kt N2O/yr)"]                          *GWP["N2O"]/1000)
+  var <- mbind(var,data[,,"Emi|F-Gases (Mt CO2-equiv/yr)"]                         )
   var <- setNames(var,gsub(" \\(.*\\)"," (Mt CO2eq/yr)",magclass::getNames(var)))
 
   p <- mipArea(var[mainReg,,],scales="free_y")

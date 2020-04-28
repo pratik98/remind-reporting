@@ -17,6 +17,9 @@
 #' @export
 #' @importFrom gdx readGDX
 #' @importFrom magclass getYears getRegions mbind setNames dimSums mselect new.magpie setYears
+#' @importFrom luscale speed_aggregate
+#'
+ 
 reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
   if(is.null(output)){
     stop("please provide a file containing all needed information")
@@ -434,7 +437,36 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
                    output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|w/ couple prod (Mt CO2/yr)"],
                    "Emi|CO2|Energy|Supply|Gross (Mt CO2/yr)")
   
+  #extra variables
+  tmp <- mbind(tmp, 
+               setNames(output[,,"Emi|CO2|Energy|Supply|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                          output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Gases|w/ couple prod (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Supply|Gases|Gross (Mt CO2/yr)"),
+               setNames(output[,,"Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"] +
+                          output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Heat|w/ couple prod (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Supply|Heat|Gross (Mt CO2/yr)"),
+               setNames(output[,,"Emi|CO2|Energy|Supply|Hydrogen|w/ couple prod (Mt CO2/yr)"] +
+                          output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Hydrogen|w/ couple prod (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Supply|Hydrogen|Gross (Mt CO2/yr)"),
+               setNames(output[,,"Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                          output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Liquids|w/ couple prod (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Supply|Liquids|Gross (Mt CO2/yr)"),
+               setNames(output[,,"Emi|CO2|Energy|Supply|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                          output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Solids|w/ couple prod (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Supply|Solids|Gross (Mt CO2/yr)")
+  )
   
+  # there is still a difference that I am putting in others until I find where it should be allocated
+  tmp <- mbind(tmp, 
+               setNames(output[,,"Emi|CO2|Energy|Supply|Gross (Mt CO2/yr)"] 
+                        - output[,,"Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)"]
+                        - dimSums(tmp[,,c("Emi|CO2|Energy|Supply|Gases|Gross (Mt CO2/yr)",
+                                          "Emi|CO2|Energy|Supply|Heat|Gross (Mt CO2/yr)",
+                                          "Emi|CO2|Energy|Supply|Hydrogen|Gross (Mt CO2/yr)",
+                                          "Emi|CO2|Energy|Supply|Liquids|Gross (Mt CO2/yr)",
+                                          "Emi|CO2|Energy|Supply|Solids|Gross (Mt CO2/yr)")],dim=3),
+                        "Emissions|CO2|Energy|Supply|Other|Gross (Mt CO2/yr)")
+  )
   
   # calculate cumulative values
   tmp <- mbind(tmp, 
