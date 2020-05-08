@@ -627,7 +627,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
     x2 <- dimSums(mselect(demSe,all_enty="sesobio"),dim=3) + dimSums(mselect(demSe,all_enty="sesofos"),dim=3)
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,			"Price|Secondary Energy|Solids (US$2005/GJ)"))
     tmp <- mbind(tmp,setNames(sebal.m[,,"sesobio"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|Secondary Energy|Solids|Biomass (US$2005/GJ)"))
-  #  tmp <- mbind(tmp,setNames(sebal.m[,,"sesofos"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|Secondary Energy|Solids|Fossils (US$2005/GJ)"))
+   # tmp <- mbind(tmp,setNames(sebal.m[,,"sesofos"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|Secondary Energy|Solids|Fossil (US$2005/GJ)"))
   }
   
   if ("sega" %in% sety) {
@@ -637,7 +637,9 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
           dimSums(mselect(demSe,all_enty="segafos"),dim=3) * abs(sebal.m[,,"segafos"]) )
     x2 <- dimSums(mselect(demSe,all_enty="segabio"),dim=3) + dimSums(mselect(demSe,all_enty="segafos"),dim=3)
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,         "Price|Secondary Energy|Gases (US$2005/GJ)"))
-  }
+    tmp <- mbind(tmp,setNames(sebal.m[,,"segabio"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Biomass (US$2005/GJ)"))
+    #tmp <- mbind(tmp,setNames(sebal.m[,,"segafos"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Fossil (US$2005/GJ)"))
+    }
  
   # some precalculations
   if ("seliq" %in% sety) {
@@ -648,8 +650,11 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
     x1[which(dimSums(mselect(prodSE,all_enty="pebiolc",all_enty1="sedie"),dim=3) < 1e-5)] <- 0
   } else {
 	  x1 <- sebal.m[,,"seliqbio"]/(budget.m+1e-10)*tdptwyr2dpgj
+	  # tmp <- mbind(tmp, setNames(sebal.m[,,"seliqfos"]/(budget.m+1e-10)*tdptwyr2dpgj,
+	  #              "Price|Secondary Energy|Liquids|Fossil (US$2005/GJ)"))
   }
   tmp <- mbind(tmp,setNames(x1, "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"))
+
   
   ## average prices
   
