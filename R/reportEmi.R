@@ -31,6 +31,113 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
        output <- output[c("GLO",names(regionSubsetList)),,invert = T]
   }
   
+  #### alternative emissions accounting
+  # Emissions|CO2                       # Emissions|CO2 (Mt CO2/yr)
+  #   |Energy                           ## Emissions|CO2|Energy (Mt CO2/yr)
+  #     |Demand                         ### Emissions|CO2|Energy|Demand (Mt CO2/yr)
+  #       |Industry                     #### Emissions|CO2|Energy|Demand|Industry (Mt CO2/yr)
+  #       |Residential and Commercial   #### Emissions|CO2|Energy|Demand|Residential and Commercial (Mt CO2/yr)
+  #       |Transportation               #### Emissions|CO2|Energy|Demand|Transportation (Mt CO2/yr)
+  #       |AFOFI                        #### Emissions|CO2|Energy|Demand|AFOFI (Mt CO2/yr)
+  #       |Other Sector                 #### Emissions|CO2|Energy|Demand|Other Sector (Mt CO2/yr)
+  #     |Supply (Gross)                 ### Emissions|CO2|Energy|Supply (Gross) (Mt CO2/yr)
+  #       |Electricity                  #### Emissions|CO2|Energy|Supply (Gross)|Electricity (Mt CO2/yr)
+  #       |Gases                        #### Emissions|CO2|Energy|Supply (Gross)|Gases (Mt CO2/yr)
+  #       |Heat                         #### Emissions|CO2|Energy|Supply (Gross)|Heat (Mt CO2/yr)
+  #       |Hydrogen                     #### Emissions|CO2|Energy|Supply (Gross)|Hydrogen (Mt CO2/yr)
+  #       |Liquids                      #### Emissions|CO2|Energy|Supply (Gross)|Liquids (Mt CO2/yr)
+  #       |Solids                       #### Emissions|CO2|Energy|Supply (Gross)|Solids (Mt CO2/yr)
+  #       |Other                        #### Emissions|CO2|Energy|Supply (Gross)|Other (Mt CO2/yr)
+  #     |Negative                       ### Emissions|CO2|Energy|Negative (Mt CO2/yr)
+  #   |Industrial Processes             ## Emissions|CO2|Industrial Processes (Mt CO2/yr)
+  #   |AFOLU                            ## Emissions|CO2|AFOLU (Mt CO2/yr)
+  #   |DACCS sequestered                ## Emissions|CO2|DACCS sequestered (Mt CO2/yr)
+  #   |Other                            ## Emissions|CO2|Other (Mt CO2/yr)
+
+  yy <- c(seq(2005,2060,5),seq(2070,2110,10),2130,2150)
+  
+  d <- list(
+    "Emissions|CO2 (Mt CO2/yr)"                                               = list("var"="o_emissions", "dim"=NA),
+    "Emissions|CO2|Energy (Mt CO2/yr)"                                        = list("var"="o_emissions_energy", "dim"=NA),
+    "Emissions|CO2|Energy|Demand (Mt CO2/yr)"                                 = list("var"="o_emissions_energy_demand", "dim"=NA),
+    "Emissions|CO2|Energy|Demand|Industry (Mt CO2/yr)"                        = list("var"="o_emissions_energy_demand_sector", "dim"="indst"),
+    "Emissions|CO2|Energy|Demand|Residential and Commercial (Mt CO2/yr)"      = list("var"="o_emissions_energy_demand_sector","dim"="build"),
+    "Emissions|CO2|Energy|Demand|Transportation (Mt CO2/yr)"                  = list("var"="o_emissions_energy_demand_sector","dim"="trans"),
+#   "Emissions|CO2|Energy|Demand|AFOFI (Mt CO2/yr)                            = list("var"=,"dim"=),
+    "Emissions|CO2|Energy|Demand|Other Sector (Mt CO2/yr)"                    = list("var"="o_emissions_energy_demand_sector","dim"=c("CDR", "Waste")),
+    "Emissions|CO2|Energy|Supply|Gross (Mt CO2/yr)"                         = list("var"="o_emissions_energy_supply_gross","dim"=NA),
+    "Emissions|CO2|Energy|Supply|Gross|Electricity (Mt CO2/yr)"             = list("var"="o_emissions_energy_supply_gross_carrier","dim"="seel"),
+    "Emissions|CO2|Energy|Supply|Gross|Gases (Mt CO2/yr)"                   = list("var"="o_emissions_energy_supply_gross_carrier","dim"=c("segabio","segafos")),
+    "Emissions|CO2|Energy|Supply|Gross|Heat (Mt CO2/yr)"                    = list("var"="o_emissions_energy_supply_gross_carrier","dim"="sehe"),
+    "Emissions|CO2|Energy|Supply|Gross|Hydrogen (Mt CO2/yr)"                = list("var"="o_emissions_energy_supply_gross_carrier","dim"="seh2"),
+    "Emissions|CO2|Energy|Supply|Gross|Liquids (Mt CO2/yr)"                 = list("var"="o_emissions_energy_supply_gross_carrier","dim"=c("seliqbio","seliqfos")),
+    "Emissions|CO2|Energy|Supply|Gross|Solids (Mt CO2/yr)"                  = list("var"="o_emissions_energy_supply_gross_carrier","dim"=c("sesobio","sesofos")),
+#    "Emissions|CO2|Energy|Supply|Gross|Other (Mt CO2/yr)"                  = list("var"="","dim"=""),
+    "Emissions|CO2|Energy|Fugitive Emissions (Mt CO2/yr)"                     = list("var"="o_emissions_energy_extraction","dim"=c("pecoal","pegas","peoil")),
+    "Emissions|CO2|Energy|Fugitive Emissions|Solids (Mt CO2/yr)"              = list("var"="o_emissions_energy_extraction","dim"="pecoal"),
+    "Emissions|CO2|Energy|Fugitive Emissions|Gas (Mt CO2/yr)"                 = list("var"="o_emissions_energy_extraction","dim"="pegas"),
+    "Emissions|CO2|Energy|Fugitive Emissions|Oil (Mt CO2/yr)"                 = list("var"="o_emissions_energy_extraction","dim"="peoil"),
+    "Emissions|CO2|Energy|Negative (Mt CO2/yr)"                               = list("var"="o_emissions_energy_negative","dim"=NA),
+    "Emissions|CO2|Industrial Processes (Mt CO2/yr)"                          = list("var"="o_emissions_industrial_processes","dim"=NA),
+    "Emissions|CO2|AFOLU (Mt CO2/yr)"                                         = list("var"="o_emissions_AFOLU","dim"=NA),
+    "Emissions|CO2|DACCS sequestered (Mt CO2/yr)"                             = list("var"="o_emissions_DACCS","dim"=NA),
+    "Emissions|CO2|Other (Mt CO2/yr)"                                         = list("var"="o_emissions_other","dim"=NA),
+
+    "Carbon Management|Carbon Capture (Mt CO2/yr)"                            = list("var"="o_capture","dim"=NA),
+    "Carbon Management|Carbon Capture|Process|Energy (Mt CO2/yr)"             = list("var"="o_capture_energy","dim"=NA),
+    "Carbon Management|Carbon Capture|Process|Energy|Electricity (Mt CO2/yr)" = list("var"="o_capture_energy_elec","dim"=NA),
+    "Carbon Management|Carbon Capture|Process|Energy|Other (Mt CO2/yr)"       = list("var"="o_capture_energy_other","dim"=NA),
+    "Carbon Management|Carbon Capture|Process|Direct Air Capture (Mt CO2/yr)" = list("var"="o_capture_cdr","dim"=NA),
+    "Carbon Management|Carbon Capture|Process|Industrial Processes (Mt CO2/yr)"=list("var"="o_capture_industry","dim"=NA),
+    "Carbon Management|Carbon Capture|Primary Energy|Biomass (Mt CO2/yr)"     = list("var"="o_capture_energy_bio","dim"=NA),
+    "Carbon Management|Carbon Capture|Primary Energy|Fossil (Mt CO2/yr)"      = list("var"="o_capture_energy_fos", "dim"=NA),
+    "Carbon Management|CCU (Mt CO2/yr)"                                       = list("var"="o_carbon_CCU","dim"=NA),
+    "Carbon Management|Land Use (Mt CO2/yr)"                                  = list("var"="o_carbon_LandUse","dim"=NA),
+    "Carbon Management|Underground Storage (Mt CO2/yr)"                       = list("var"="o_carbon_underground","dim"=NA),
+    "Carbon Management|Carbon reemitted (Mt CO2/yr)"                          = list("var"="o_carbon_reemitted","dim"=NA)
+  )
+  
+  #yy <- intersect(readGDX(gdx, "t",format="first_found"),y)
+
+  # if(dim(vm_co2CCUshort)[1]==0) {
+  #   vm_co2CCUshort <- new.magpie(getRegions(v_emi),getYears(v_emi),"cco2.co2CCUshort.h22ch4.1",fill=0)
+  # }  else {
+  #   vm_co2CCUshort           <- vm_co2CCUshort[,y,]
+  
+  rr <- readGDX(gdx,"regi",format="first_found")
+  
+  x <- NULL
+  x <- mbind(x,
+             do.call("mbind",
+                     lapply(names(d), function(v){
+                       #getDim(NA,gdx_data)
+                       gdx_data <- readGDX(gdx, d[[v]]$var, field = 'l', restore_zeros=FALSE, format = 'first_found')
+                       if (length(gdx_data) > 0){
+                         if(!(is.na(d[[v]]$dim[[1]]))){
+                           gdx_data <- dimSums(gdx_data[,,intersect(d[[v]]$dim,getNames(gdx_data,dim=2))],dim=3.2)
+                         }
+                         gdx_data_f <- new.magpie(rr,yy,getNames(gdx_data),fill=0)
+                         gdx_data_f[getRegions(gdx_data),getYears(gdx_data),getNames(gdx_data)] <- gdx_data[getRegions(gdx_data),getYears(gdx_data),getNames(gdx_data)]
+                         gdx_data_f[is.na(gdx_data_f)] <- 0
+                         if ("co2" %in% getNames(gdx_data_f)){
+                           return(setNames(dimSums(gdx_data_f[,,"co2"]), v))
+                         }
+                       }
+                      #  if ((length(gdx_data_f) > 0) && ("co2" %in% getNames(gdx_data_f))){
+                      #    if(!(is.na(d[[v]]$dim))){
+                      #      dim <- intersect(getNames(gdx_data_f[,y,"co2"],dim=2),d[[v]]$dim)
+                      #      if (length(dim) == 0){
+                      #        return()
+                      #      }
+                      #      gdx_data_f <- gdx_data_f[,,dim]
+                      #    }
+                      #    if(!is.null(gdx_data_f[,y,"co2"]))
+                      #      setNames(dimReduce(dimSums(gdx_data_f[,y,"co2"])), v)
+                      #    }
+                       })
+                     )
+  )
+  
   ####### conversion factors ##########
   s_GWP_CH4 <- readGDX(gdx,c("sm_gwpCH4","s_gwpCH4","s_GWP_CH4"),format="first_found", react = "silent")
   s_GWP_N2O <- readGDX(gdx,c("s_gwpN2O","s_GWP_N2O"),format="first_found")
@@ -271,28 +378,112 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   
   
   # #### alternative emissions accounting
-  # # Emissions|CO2
-  # #   |Energy
-  # #     |Demand
-  # #       |Industry
-  # #       |Residential and Commercial
-  # #       |Transportation
-  # #       |AFOFI
-  # #       |Other Sector
-  # #     |Supply (Gross)
-  # #       |Electricity
-  # #       |Gases
-  # #       |Heat
-  # #       |Hydrogen
-  # #       |Liquids
-  # #       |Solids
-  # #       |Other
-  # #     |Negative
-  # #   |Industrial Processes
-  # #   |AFOLU
-  # #   |DACCS sequestered
-  # #   |Other
+  # # Emissions|CO2                       # Emissions|CO2 (Mt CO2/yr)
+  # #   |Energy                           ## Emissions|CO2|Energy (Mt CO2/yr)
+  # #     |Demand                         ### Emissions|CO2|Energy|Demand (Mt CO2/yr)
+  # #       |Industry                     #### Emissions|CO2|Energy|Demand|Industry (Mt CO2/yr)
+  # #       |Residential and Commercial   #### Emissions|CO2|Energy|Demand|Residential and Commercial (Mt CO2/yr)
+  # #       |Transportation               #### Emissions|CO2|Energy|Demand|Transportation (Mt CO2/yr)
+  # #       |AFOFI                        #### Emissions|CO2|Energy|Demand|AFOFI (Mt CO2/yr)
+  # #       |Other Sector                 #### Emissions|CO2|Energy|Demand|Other Sector (Mt CO2/yr)
+  # #     |Supply (Gross)                 ### Emissions|CO2|Energy|Supply (Gross) (Mt CO2/yr)
+  # #       |Electricity                  #### Emissions|CO2|Energy|Supply (Gross)|Electricity (Mt CO2/yr)
+  # #       |Gases                        #### Emissions|CO2|Energy|Supply (Gross)|Gases (Mt CO2/yr)
+  # #       |Heat                         #### Emissions|CO2|Energy|Supply (Gross)|Heat (Mt CO2/yr)
+  # #       |Hydrogen                     #### Emissions|CO2|Energy|Supply (Gross)|Hydrogen (Mt CO2/yr)
+  # #       |Liquids                      #### Emissions|CO2|Energy|Supply (Gross)|Liquids (Mt CO2/yr)
+  # #       |Solids                       #### Emissions|CO2|Energy|Supply (Gross)|Solids (Mt CO2/yr)
+  # #       |Other                        #### Emissions|CO2|Energy|Supply (Gross)|Other (Mt CO2/yr)
+  # #     |Negative                       ### Emissions|CO2|Energy|Negative (Mt CO2/yr)
+  # #   |Industrial Processes             ## Emissions|CO2|Industrial Processes (Mt CO2/yr)
+  # #   |AFOLU                            ## Emissions|CO2|AFOLU (Mt CO2/yr)
+  # #   |DACCS sequestered                ## Emissions|CO2|DACCS sequestered (Mt CO2/yr)
+  # #   |Other                            ## Emissions|CO2|Other (Mt CO2/yr)
   # 
+  
+  # Emissions|CO2|ESD (Mt CO2/yr)
+  # Emissions|CO2|ETS (Mt CO2/yr)
+  # Emissions|CO2|Other regulation (Mt CO2/yr)
+  # 
+  # Emissions|CO2|Energy|Demand|Commercial (Mt CO2/yr)
+  # Emissions|CO2|Energy|Demand|Residential (Mt CO2/yr)
+  # 
+  # Emissions|CO2|Energy|Demand|Transportation|Freight (Mt CO2/yr)
+  # Emissions|CO2|Energy|Demand|Transportation|Passenger (Mt CO2/yr)
+  # 
+  # Emissions|CO2|Energy|Supply (Gross)|Industry (Mt CO2/yr)
+  # # Emissions|CO2|Energy|Supply (Gross)|Residential and Commercial (Mt CO2/yr)
+  # # Emissions|CO2|Energy|Supply (Gross)|Transportation (Mt CO2/yr)
+  # 
+  # 
+  # #warning changes the conversion factor according to emission in the future (I only care about CO2 now)
+  # y <- c(seq(2005,2060,5),seq(2070,2110,10),2130,2150)
+  # GtC_2_MtCO2 <- 44 / 12 * 1000
+  # 
+  # vm_emiAllMkt      <- readGDX(gdx, 'vm_emiAllMkt', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,"co2"]*GtC_2_MtCO2
+  # vm_emiTeMkt       <- readGDX(gdx, 'vm_emiTeMkt', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,"co2"]*GtC_2_MtCO2
+  # vm_demFeSector    <- readGDX(gdx, 'vm_demFeSector', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,]*GtC_2_MtCO2
+  # vm_demPE          <- readGDX(gdx, 'vm_demPe', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,] *GtC_2_MtCO2
+  # vm_fuExtr         <- readGDX(gdx, 'vm_fuExtr', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,]*GtC_2_MtCO2 
+  # vm_co2CCS         <- readGDX(gdx, 'vm_co2CCS', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,]*GtC_2_MtCO2 
+  # vm_emiIndCCS      <- readGDX(gdx, 'vm_emiIndCCS', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,"co2cement_process"]*GtC_2_MtCO2 
+  # v_co2capturevalve <- readGDX(gdx, 'v_co2capturevalve', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,]*GtC_2_MtCO2
+  # vm_co2CCUshort    <- readGDX(gdx, 'vm_co2CCUshort', field = 'l', restore_zeros=FALSE, format = 'first_found')[,y,]*GtC_2_MtCO2 
+  # 
+  # pm_emifac         <- dimReduce(readGDX(gdx,name=c("pm_emifac") ,restore_zeros=FALSE, react = "silent")[,y,"co2"])
+  # 
+  # se2fe <- readGDX(gdx,name=c("se2fe")) 
+  # 
+  # 
+  # 
+  # 
+  # 
+  # getNames(pm_emifac[se2fe])
+  # 
+  # 
+  # #emi2te            <- readGDX(gdx,name=c("emi2te")) 
+  # 
+  # 
+  # out <- mbind(
+  #   setNames(dimSums(vm_emiAllMkt), "Emissions|CO2 (Mt CO2/yr)"),
+  #   
+  #   setNames(dimSums(vm_emiTeMkt), "Emissions|CO2|Energy (Mt CO2/yr)"),
+  #   
+  #   setNames( pm_emifac[se2fe] * dimReduce(dimSums(vm_demFeSector,dim=c(3.4))[,,"indst"])[se2fe], "Emissions|CO2|Energy|Demand|Industry (Mt CO2/yr)"  
+  #   )
+  # 
+  #   
+    # Emissions|CO2|Energy|Demand (Mt CO2/yr)
+    # Emissions|CO2|Energy|Demand|Industry (Mt CO2/yr)
+    # Emissions|CO2|Energy|Demand|Residential and Commercial (Mt CO2/yr)
+    # Emissions|CO2|Energy|Demand|Transportation (Mt CO2/yr)
+    # Emissions|CO2|Energy|Demand|AFOFI (Mt CO2/yr)
+    # Emissions|CO2|Energy|Demand|Other Sector (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross) (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Electricity (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Gases (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Heat (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Hydrogen (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Liquids (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Solids (Mt CO2/yr)
+    # Emissions|CO2|Energy|Supply (Gross)|Other (Mt CO2/yr)
+    # Emissions|CO2|Energy|Negative (Mt CO2/yr)
+    # Emissions|CO2|Industrial Processes (Mt CO2/yr)
+    # Emissions|CO2|AFOLU (Mt CO2/yr)
+    # Emissions|CO2|DACCS sequestered (Mt CO2/yr)
+    # Emissions|CO2|Other (Mt CO2/yr)  
+  #)
+
+  
+               
+    # setNames(dimSums(emi_pe2se[,,c("seel","segafos","sehe","seh2","seliqfos","sesofos")]),
+    #          #            "Emissions|CO2|Energy|Supply (Gross) (Mt CO2/yr)"),
+    #          
+    # out,
+  
+  
+  
+  
   # #emi2te     <- readGDX(gdx,name=c("emi2te"))
   # r_pe2se     <- readGDX(gdx,name=c("pe2se"))
   # pm_emifac <- readGDX(gdx,name=c("pm_emifac") ,restore_zeros=FALSE, react = "silent")
@@ -508,6 +699,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   
   tmp <- mbind(
     tmp,
+    x,
     ### please note: at the end of this file, regional CO2 emissions are reduced by bunker emission values emissions are reduced by bunker emission values
     setNames((vm_emiengregi[,,"co2"] + vm_sumeminegregi[,,"co2"] + vm_emicdrregi[,,"co2"]) * GtC_2_MtCO2,	"Emi|CO2 (Mt CO2/yr)"),
     setNames((vm_co2CCS[,,"cco2.ico2.ccsinje.1"]) * GtC_2_MtCO2,                               "Emi|CO2|Carbon Capture and Storage (Mt CO2/yr)"),
