@@ -1239,11 +1239,23 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
        collapseNames(tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]/
                        GtC_2_MtCO2))/
       vm_co2capture)
+  p_share_cco2_bio[is.na(p_share_cco2_bio)] <- 0
+  
   
   # share of captured carbon from DAC
   p_share_cco2_DAC <- (
-    v33_emiDAC /
+    -v33_emiDAC /
       vm_co2capture)
+  p_share_cco2_DAC[is.na(p_share_cco2_DAC)] <- 0
+  
+  # share of captured carbon from industry
+  p_share_cco2_ind <- dimSums(vm_emiIndCCS[,y,], dim=3) / vm_co2capture
+  p_share_cco2_ind[is.na(p_share_cco2_ind)] <- 0
+  
+  # share of captured fossil carbon from industry
+  p_share_cco2_ind_fos <- (dimSums(vm_emiIndCCS[,y,], dim=3)-tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]/
+    GtC_2_MtCO2) / vm_co2capture
+  p_share_cco2_ind_fos[is.na(p_share_cco2_ind_fos)] <- 0
   
   # LUC CDR, report only negative values of CO2 LUC as CDR
   CDRco2luc <- new.magpie(getRegions(vm_eminegregi),getYears(vm_eminegregi),magclass::getNames(vm_eminegregi),fill=0)
@@ -1328,7 +1340,17 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     setNames(
       dimSums(vm_co2CCUshort,dim=3) * (1-p_share_cco2_DAC-p_share_cco2_bio) *
         GtC_2_MtCO2,
-      "Carbon Sequestration|CCU|Fossil (Mt CO2/yr)")
+      "Carbon Sequestration|CCU|Fossil (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_ind *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Industry (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_ind_fos *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Fossil Industry (Mt CO2/yr)")
     
   )
   # cumulative CDR emissions
