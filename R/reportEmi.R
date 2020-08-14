@@ -803,6 +803,44 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
       tmp <- mbind(tmp, target)
     } 
     
+    #Industry ETS emissions
+    vm_demFeSector <- readGDX(gdx,name=c("vm_demFeSector"),field="l",format="first_found",restore_zeros=FALSE)
+    pm_emifac      <- readGDX(gdx,name=c("pm_emifac"),format="first_found",restore_zeros=FALSE)
+    vm_emiIndCCS   <- readGDX(gdx,name=c("vm_emiIndCCS"),field="l",format="first_found",restore_zeros=FALSE)
+    
+    vm_demFeSector <- vm_demFeSector[,yy,]
+    pm_emifac      <- pm_emifac[,yy,]
+    vm_emiIndCCS   <- vm_emiIndCCS[,yy,]
+    
+    
+    indstFEdem <- dimReduce(vm_demFeSector[,,"indst"])
+    indstCCS   <- dimSums(vm_emiIndCCS[,,]) 
+    
+    indst_df <- merge(as.quitte(indstFEdem[,,intersect(getNames(indstFEdem,dim=2),getNames(pm_emifac,dim=2))])[,-c(1,2,4,5)],as.quitte(pm_emifac[,,intersect(getNames(indstFEdem,dim=2),getNames(pm_emifac,dim=2))])[,-c(1,2,4,5)],by=c("all_enty","all_enty1","region","period"))
+    colnames(indst_df) <- c("se","fe","region","period","demFe","emiMkt","emiFactor","tech","emiGas")
+    
+    indst_df <- indst_df %>%
+      mutate(emissions = .data$demFe * .data$emiFactor) 
+    
+    indstEmiMkt <- indst_df %>%
+      group_by(.data$region,.data$emiMkt,.data$period,.data$emiGas) %>%
+      summarise(indstEmiMKT = sum(.data$emissions)) 
+    
+    # Industry ETS emissions before discounting Industry CCS (Mt CO2)
+    tmp <- mbind(tmp,
+                 setNames(as.magpie(as.data.frame(indstEmiMkt))[,,"ETS.co2"] * GtC_2_MtCO2, "Emi|CO2|Industry|ETS (Mt CO2/yr)"),
+                 setNames(as.magpie(as.data.frame(indstEmiMkt))[,,"ES.co2"] * GtC_2_MtCO2, "Emi|CO2|Industry|ESD (Mt CO2/yr)"),
+                 setNames(as.magpie(as.data.frame(indstEmiMkt))[,,"other.co2"] * GtC_2_MtCO2, "Emi|CO2|Industry|other - Non ETS and ES (Mt CO2/yr)")
+    )
+    
+    #Industry Process GHG emissions
+    #tmp <- mbind(tmp,
+    #             setNames(
+    #               GtC_2_MtCO2 * 
+    #               +MtN2_to_ktN2O * ( vm_eminegregi[,,"n2oadac"] + vm_eminegregi[,,"n2onitac"] ), 
+    #               "Emi|GHG|Industry|Process|ETS"
+    #               )
+    #)
   }
   
   ### CDR/CCU emissions ##########################################################################################  
