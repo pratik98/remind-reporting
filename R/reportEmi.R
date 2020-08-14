@@ -1491,6 +1491,8 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     
     
     ### CH4 ###############################################################################
+    GWP <- c("CO2"=1,"CH4"=28,"N2O"=265)
+    
     tmp2 <- NULL
     tmp2 <- mbind(tmp2,setNames( vm_sumeminegregi[,,"ch4"] + vm_emiengregi[,,"ch4"],      "Emi|CH4 (Mt CH4/yr)"))
     tmp2 <- mbind(tmp2,setNames( cumulatedValue(tmp2[,,"Emi|CH4 (Mt CH4/yr)"]),           "Emi|CH4|Cumulated (Mt CH4/yr)"))
@@ -1498,7 +1500,10 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
       tmp2 <- mbind(tmp2,
         setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="ETS")  ,dim=3)), "Emi|CH4|ETS (Mt CH4/yr)"),
         setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="ES")   ,dim=3)), "Emi|CH4|ES (Mt CH4/yr)"), 
-        setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="other"),dim=3)), "Emi|CH4|other - Non ETS and ES (Mt CH4/yr)")) 
+        setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="other"),dim=3)), "Emi|CH4|other - Non ETS and ES (Mt CH4/yr)"), 
+        setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="ETS")  ,dim=3))*GWP["CH4"], "Emi|CH4|ETS|MtCO2eq (Mt CO2-equiv/yr)"),
+        setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="ES")   ,dim=3))*GWP["CH4"], "Emi|CH4|ES|MtCO2eq (Mt CO2-equiv/yr)"), 
+        setNames((dimSums(mselect(vm_emiAllMkt,all_enty="ch4",all_emiMkt="other"),dim=3))*GWP["CH4"], "Emi|CH4|other - Non ETS and ES|MtCO2eq (Mt CO2-equiv/yr)"))
     }
     tmp2 <- mbind(tmp2,setNames( vm_emiengregi[,,"ch4"],                                  "Emi|CH4|Energy Demand|ResCom (Mt CH4/yr)"))
     tmp2 <- mbind(
@@ -1520,13 +1525,17 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   
   
   ### N2O ################################################################################
+  GWP <- c("CO2"=1,"CH4"=28,"N2O"=265)
   tmp3 <- NULL
   tmp3 <- mbind(tmp3,setNames((vm_sumeminegregi[,,"n2o"] + vm_emiengregi[,,"n2o"]) * MtN2_to_ktN2O,    "Emi|N2O (kt N2O/yr)"))
   if(!is.null(vm_emiAllMkt)) {
     tmp3 <- mbind(tmp3,
                   setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="ETS")  ,dim=3)) * MtN2_to_ktN2O, "Emi|N2O|ETS (kt N2O/yr)"),
                   setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="ES")   ,dim=3)) * MtN2_to_ktN2O, "Emi|N2O|ES (kt N2O/yr)"), 
-                  setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="other"),dim=3)) * MtN2_to_ktN2O, "Emi|N2O|other - Non ETS and ES (kt N2O/yr)")) 
+                  setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="other"),dim=3)) * MtN2_to_ktN2O, "Emi|N2O|other - Non ETS and ES (kt N2O/yr)"), 
+                  setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="ETS")  ,dim=3)) * MtN2_to_ktN2O * GWP["N2O"]/1000, "Emi|N2O|ETS|MtCO2eq (Mt CO2-equiv/yr)"),
+                  setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="ES")   ,dim=3)) * MtN2_to_ktN2O * GWP["N2O"]/1000, "Emi|N2O|ES|MtCO2eq (Mt CO2-equiv/yr)"), 
+                  setNames((dimSums(mselect(vm_emiAllMkt,all_enty="n2o",all_emiMkt="other"),dim=3)) * MtN2_to_ktN2O * GWP["N2O"]/1000, "Emi|N2O|other - Non ETS and ES|MtCO2eq (Mt CO2-equiv/yr)")) 
   }
   tmp3 <- mbind(tmp3,setNames(cumulatedValue(tmp3[,,"Emi|N2O (kt N2O/yr)"]),                            "Emi|N2O|Cumulated (kt N2O/yr)"))
   tmp3 <- mbind(tmp3,setNames((vm_emiengregi[,,"n2o"] + vm_eminegregi[,,"n2otrans"]) * MtN2_to_ktN2O,  "Emi|N2O|Energy Supply and Demand (kt N2O/yr)"))
