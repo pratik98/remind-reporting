@@ -829,7 +829,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                  setNames(as.magpie(as.data.frame(indstEmiMkt))[,,"ES.co2"] * GtC_2_MtCO2, "Emi|CO2|Industry|ESD (Mt CO2/yr)"),
                  setNames(as.magpie(as.data.frame(indstEmiMkt))[,,"other.co2"] * GtC_2_MtCO2, "Emi|CO2|Industry|other - Non ETS and ES (Mt CO2/yr)")
     )
-    # Felix's ETS GHG industry reporting
+    ### -------------- Felix's ETS/ESD GHG reporting ------------------------
     
     # constants
     s_GWP_CH4 <- readGDX(gdx,c("sm_gwpCH4","s_gwpCH4","s_GWP_CH4"),format="first_found", react = "silent")
@@ -850,12 +850,10 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     vm_emiMacSector <- readGDX(gdx, "vm_emiMacSector", field = "l", restore_zeros = F)
     # mac sector to emission market mapping
     macSector2emiMkt <- readGDX(gdx, "macSector2emiMkt")
-    # mac sector to emissions gas
-    emiMacSector2emiMac <- readGDX(gdx, "emiMacSector2emiMac")
     # map mac sectors to "reporting" sectors
     emiMac2sector <- readGDX(gdx, "emiMac2sector")
     
-    # calculate non-energy emissions (MAC emissions)
+    # calculate non-energy/process GHG emissions (MAC emissions) per emissions market
     df.nonEn.Emi <- as.quitte(vm_emiMacSector[,,emiMacSector2emiMac$all_enty]) %>% 
                       left_join(macSector2emiMkt) %>% 
                       left_join(emiMac2sector) %>%     
@@ -868,40 +866,40 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                       group_by(region, period, all_emiMkt, emi_sectors) %>% 
                       summarise( value = sum(value)) %>% 
                       ungroup()
-    
-    EmiNonenSector <- as.magpie(df.nonEn.Emi, spatial = 1, temporal = 2, datacol=5)
-    
-    
    
-    # calculate energy emissions (multiply sectoral FE demand with emissions factors)
+    EmiNonenSector <- as.magpie(df.nonEn.Emi, spatial = 1, temporal = 2, datacol=5)
+   
+    # calculate energy demand-side GHG emissions per emissions market
+    # (multiply sectoral FE demand with emissions factors)
     df.en.Emi <- as.quitte(vm_demFeSector) %>% 
                         filter(period >= 2005) %>% 
                         left_join(as.quitte(pm_emifac) %>% 
-                  select(region, period, all_enty, all_enty1, all_te, all_enty2, value) %>%
-                  filter(all_enty2 %in% c("co2","n2o","ch4")) %>% 
-                  rename( emiFac = value)) %>%
-                  # only retain technologies whose emissions 
-                  # are linked to a sector in vm_demFeSector
-                  filter( !is.na(all_te)) %>%
-                  # calculate emissions in REMIND native units
-                  mutate( emi = value * emiFac) %>% 
-                  # conversion to MtCO2eq (unit conversion and global warming potential)
-                  mutate( value = ifelse(all_enty2 == "co2", value * GtC_2_MtCO2, value)) %>% 
-                  mutate( value = ifelse(all_enty2 == "ch4", value * as.numeric(s_GWP_CH4[,,]), value)) %>%
-                  mutate( value = ifelse(all_enty2 == "n2o", MtN2_to_ktN2O * as.numeric(s_GWP_N2O[,,]) / 1000 * value,
+                          select(region, period, all_enty, all_enty1, all_te, all_enty2, value) %>%
+                          filter(all_enty2 %in% c("co2","n2o","ch4")) %>% 
+                          rename( emiFac = value)) %>%
+                        # only retain technologies whose emissions 
+                        # are linked to a sector in vm_demFeSector
+                        filter( !is.na(all_te)) %>%
+                        # calculate emissions in REMIND native units 
+                        mutate( emi = value * emiFac) %>% 
+                        # conversion to MtCO2eq 
+                        # (unit conversion and multiplication w/ global warming potential)
+                        mutate( value = ifelse(all_enty2 == "co2", value * GtC_2_MtCO2, value)) %>% 
+                        mutate( value = ifelse(all_enty2 == "ch4", value * as.numeric(s_GWP_CH4[,,]), value)) %>%
+                        mutate( value = ifelse(all_enty2 == "n2o", 
+                                               MtN2_to_ktN2O * as.numeric(s_GWP_N2O[,,]) / 1000 * value,
                              value)) %>% 
-                  # aggregate to total GHG for sector and market
-                  group_by(region, period, all_emiMkt, emi_sectors) %>% 
-                  summarise( value = sum(value)) %>% 
-                  ungroup()
+                        # aggregate to total GHG for sector and market
+                        group_by(region, period, all_emiMkt, emi_sectors) %>% 
+                        summarise( value = sum(value)) %>% 
+                        ungroup()
     
     EmiEnSector <- as.magpie(df.en.Emi, spatial = 1, temporal = 2, datacol=5)
     
     
-    # calculate industry ETS and ESD emissions
-    #tmp <- NULL
-    
-    # Industry ETS energy GHG emissions
+    ### calculate industry ETS and ESD emissions
+
+    # Industry ETS energy GHG emissions:
     # all se2fe ESM industry emissions of ETS - industry energy CCS 
     tmp <- mbind(tmp,
                  # industry energy ETS emissions: ESM industry emissions - industry energy CCS
@@ -931,7 +929,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                              "Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"))
     }
 
-    # total GHG emissions per sector
+    # total GHG industry emissions per market
     tmp <- mbind(tmp,
                  # total industry ETS (after Industry CCS)
                  setNames( tmp[,,"Emi|GHG|Industry|Energy|ETS (Mt CO2-equiv/yr)"] +
@@ -940,9 +938,42 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                  # total industry ESD (after Industry CCS)
                  setNames( tmp[,,"Emi|GHG|Industry|Energy|ESD (Mt CO2-equiv/yr)"] +
                              tmp[,,"Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"],
-                           "Emi|GHG|Industry|ESD (Mt CO2-equiv/yr)")                
+                           "Emi|GHG|Industry|ESD (Mt CO2-equiv/yr)")
     )
-                      
+                 
+                 
+    ### extraction sector (process/non-energy) GHG emissions (fugitive emissions)
+    tmp <- mbind(tmp,
+                 setNames(
+                    # non-energy/process extraction emissions (from MACs) 
+                    EmiNonenSector[,,"ETS.extraction"],
+                    "Emi|GHG|Fugitive|ETS (Mt CO2-equiv/yr)"))
+    
+    
+    # if no extraction process emissions assigned to ESD -> ESD fugitive = 0
+    if ("ES.extraction" %in% getNames(EmiNonenSector)) {
+      tmp <- mbind(tmp,
+                   setNames( EmiNonenSector[,,"ES.extraction"],
+                             "Emi|GHG|Fugitive|ESD (Mt CO2-equiv/yr)"))
+    } else {
+      tmp <- mbind(tmp,
+                   setNames( EmiNonenSector[,,"ETS.extraction"]*0,
+                             "Emi|GHG|Fugitive|ESD (Mt CO2-equiv/yr)"))
+    }
+    
+    ### waste (process/non-energy) GHG emissions
+    tmp <- mbind(tmp,
+                 setNames(
+                   EmiNonenSector[,,"ES.Waste"],
+                   "Emi|GHG|Waste|ESD (Mt CO2-equiv/yr)")
+    )
+    
+    ### agriculture (process/non-energy) GHG emissions
+    tmp <- mbind(tmp,
+                 setNames(
+                   EmiNonenSector[,,"ES.Agriculture"],
+                   "Emi|GHG|Agriculture|ESD (Mt CO2-equiv/yr)")
+    )
   }
   
   
