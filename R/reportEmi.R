@@ -872,11 +872,11 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     # calculate energy demand-side GHG emissions per emissions market
     # (multiply sectoral FE demand with emissions factors)
     df.en.Emi <- as.quitte(vm_demFeSector) %>% 
-                        filter(period >= 2005) %>% 
+                        filter(period >= 2005) %>%  
                         left_join(as.quitte(pm_emifac) %>% 
                           select(region, period, all_enty, all_enty1, all_te, all_enty2, value) %>%
                           filter(all_enty2 %in% c("co2","n2o","ch4")) %>% 
-                          rename( emiFac = value)) %>%
+                          rename( emiFac = value)) %>% 
                         # only retain technologies whose emissions 
                         # are linked to a sector in vm_demFeSector
                         filter( !is.na(all_te)) %>%
@@ -884,14 +884,14 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                         mutate( emi = value * emiFac) %>% 
                         # conversion to MtCO2eq 
                         # (unit conversion and multiplication w/ global warming potential)
-                        mutate( value = ifelse(all_enty2 == "co2", value * GtC_2_MtCO2, value)) %>% 
-                        mutate( value = ifelse(all_enty2 == "ch4", value * as.numeric(s_GWP_CH4[,,]), value)) %>%
-                        mutate( value = ifelse(all_enty2 == "n2o", 
-                                               MtN2_to_ktN2O * as.numeric(s_GWP_N2O[,,]) / 1000 * value,
-                             value)) %>% 
+                        mutate( emi = ifelse(all_enty2 == "co2", emi * GtC_2_MtCO2, emi)) %>% 
+                        mutate( emi = ifelse(all_enty2 == "ch4", emi * as.numeric(s_GWP_CH4[,,]), emi)) %>%
+                        mutate( emi = ifelse(all_enty2 == "n2o", 
+                                               MtN2_to_ktN2O * as.numeric(s_GWP_N2O[,,]) / 1000 * emi,
+                                             emi)) %>%   
                         # aggregate to total GHG for sector and market
                         group_by(region, period, all_emiMkt, emi_sectors) %>% 
-                        summarise( value = sum(value)) %>% 
+                        summarise( emi = sum(emi)) %>% 
                         ungroup()
     
     EmiEnSector <- as.magpie(df.en.Emi, spatial = 1, temporal = 2, datacol=5)
