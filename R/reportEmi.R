@@ -1498,6 +1498,147 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     
   }
   
+  
+  
+  ### CDR/CCU emissions ##########################################################################################  
+  ### moved here to include industry CCS
+  
+  
+  # calculate CCU/CDR share parameters
+  
+  ### share of captured carbon that is biogenic
+  # technology (pe2se technology cco2 + industry cco2 biomass)/captured co2
+  p_share_cco2_bio <- (
+    (dimSums(v_emi[,,pebio][,,"cco2"], dim=3) + 
+       collapseNames(tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]/
+                       GtC_2_MtCO2))/
+      vm_co2capture)
+  p_share_cco2_bio[is.na(p_share_cco2_bio)] <- 0
+  
+  
+  # share of captured carbon from DAC
+  p_share_cco2_DAC <- (
+    -v33_emiDAC /
+      vm_co2capture)
+  p_share_cco2_DAC[is.na(p_share_cco2_DAC)] <- 0
+  
+  # share of captured carbon from industry
+  p_share_cco2_ind <- dimSums(vm_emiIndCCS[,y,], dim=3) / vm_co2capture
+  p_share_cco2_ind[is.na(p_share_cco2_ind)] <- 0
+  
+  # share of captured fossil carbon from industry
+  p_share_cco2_ind_fos <- (dimSums(vm_emiIndCCS[,y,], dim=3)-tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]/
+    GtC_2_MtCO2) / vm_co2capture
+  p_share_cco2_ind_fos[is.na(p_share_cco2_ind_fos)] <- 0
+  
+  # LUC CDR, report only negative values of CO2 LUC as CDR
+  CDRco2luc <- new.magpie(getRegions(vm_eminegregi),getYears(vm_eminegregi),magclass::getNames(vm_eminegregi),fill=0)
+  CDRco2luc <- vm_eminegregi
+  CDRco2luc[CDRco2luc>0] <- 0
+  tmp <- mbind(
+    tmp,
+    
+    setNames(
+      CDRco2luc[,,"co2luc"] * GtC_2_MtCO2,
+      "Emi|CO2|CDR|Land-Use Change (Mt CO2/yr)"),
+    
+    # bioenergy carbon capture: pe2se technology cco2 + industry cco2 biomass
+    setNames(
+      (dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3)
+       * GtC_2_MtCO2 
+       + collapseNames(tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]))*(-1), 
+      "Emi|CO2|BECC (Mt CO2/yr)"),
+    # bioenergy carbon capture: pe2se technology cco2 + industry cco2 biomass
+    setNames(
+      (dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3)
+       * GtC_2_MtCO2 
+       + collapseNames(tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]))
+      * p_share_carbonCapture_stor 
+      * (-1),
+      "Emi|CO2|CDR|BECCS (Mt CO2/yr)"),
+    
+    setNames(v33_emiEW[,,"emiEW"] * GtC_2_MtCO2, "Emi|CO2|CDR|EW (Mt CO2/yr)"),
+    setNames(v33_emiDAC[,,"emiDAC"] * GtC_2_MtCO2, "Emi|CO2|DAC (Mt CO2/yr)"),
+    setNames(
+      v33_emiDAC[,,"emiDAC"] 
+      * p_share_carbonCapture_stor
+      * GtC_2_MtCO2,
+      "Emi|CO2|CDR|DACCS (Mt CO2/yr)"),
+    
+    setNames(
+      v33_emiDAC[,,"emiDAC"] * GtC_2_MtCO2 * (-1),
+      "Carbon Sequestration|Direct Air Capture (Mt CO2/yr)")
+  )
+  
+  tmp <- mbind(
+    tmp, 
+    
+    setNames(
+      ( v33_emiEW[,,"emiEW"]
+        + ( ( v33_emiDAC[,,"emiDAC"]
+              - dimSums(
+                mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), 
+                dim = 3) 
+              - collapseNames(tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"]/
+                                GtC_2_MtCO2)
+              
+        )
+        * p_share_carbonCapture_stor
+        )
+        + CDRco2luc[,,"co2luc"]
+      ) 
+      * GtC_2_MtCO2,
+      "Emi|CO2|CDR (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(mselect(vm_co2capture, all_enty = "cco2"), dim = 3) 
+      * GtC_2_MtCO2,
+      "Carbon Sequestration|CC (Mt CO2/yr)"),
+    
+    setNames(
+      vm_co2CCS[,,"cco2.ico2.ccsinje.1"] * GtC_2_MtCO2,
+      "Carbon Sequestration|CCS (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * GtC_2_MtCO2,
+      "Carbon Sequestration|CCU (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_bio * GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Biomass (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_DAC * GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|DAC (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * (1-p_share_cco2_DAC-p_share_cco2_bio) *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Fossil (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_ind *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Industry (Mt CO2/yr)"),
+    
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_ind_fos *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Fossil Industry (Mt CO2/yr)")
+    
+  )
+  # cumulative CDR emissions
+  tmp <- mbind(tmp, 
+               setNames(cumulatedValue(tmp[,,"Emi|CO2|CDR|Land-Use Change (Mt CO2/yr)"]), "Emi|CO2|CDR|Land-Use Change|Cumulated (Mt CO2/yr)"),
+               setNames(cumulatedValue(tmp[,,"Emi|CO2|CDR|BECCS (Mt CO2/yr)"]),           "Emi|CO2|CDR|BECCS|Cumulated (Mt CO2/yr)"),
+               setNames(cumulatedValue(tmp[,,"Emi|CO2|CDR|EW (Mt CO2/yr)"]),              "Emi|CO2|CDR|EW|Cumulated (Mt CO2/yr)"),
+               setNames(cumulatedValue(tmp[,,"Emi|CO2|CDR|DACCS (Mt CO2/yr)"]),           "Emi|CO2|CDR|DACCS|Cumulated (Mt CO2/yr)"),
+               setNames(cumulatedValue(tmp[,,"Carbon Sequestration|CCS (Mt CO2/yr)"]),    "Carbon Sequestration|CCS|Cumulated (Mt CO2/yr)"),
+               setNames(cumulatedValue(tmp[,,"Emi|CO2|CDR (Mt CO2/yr)"]),                 "Emi|CO2|CDR|Cumulated (Mt CO2/yr)")
+  )
+  
+  
+  
   ## create the normal aliases for the more detailed names that specify that couple production is included
   tmp <- mbind(tmp,
                setNames(tmp[,,"Emi|CO2|Energy|Supply|Electricity|w/ couple prod (Mt CO2/yr)"], "Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"),

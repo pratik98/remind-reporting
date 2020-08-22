@@ -39,8 +39,9 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   sety <- readGDX(gdx,c("entySe","sety"),format="first_found")
   
   # the set liquids changed from sepet+sedie to seLiq in REMIND 1.7. Seliq, sega and seso changed to include biomass or Fossil origin after REMIND 2.0
-  se_Liq    <- intersect(c("seliqfos", "seliqbio", "seliq", "sepet","sedie"),sety)
-  se_Gas    <- intersect(c("segafos", "segabio", "sega"),sety)
+  # also added seliqsyn and segasyn for synthetic liquids and gases from CCU
+  se_Liq    <- intersect(c("seliqfos", "seliqbio","seliqsyn", "seliq", "sepet","sedie"),sety)
+  se_Gas    <- intersect(c("segafos", "segabio","segasyn", "sega"),sety)
   se_Solids <- intersect(c("sesofos", "sesobio", "seso"),sety)
   
   se2fe <- readGDX(gdx,"se2fe")

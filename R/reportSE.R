@@ -45,8 +45,9 @@ reportSE <- function(gdx,regionSubsetList=NULL){
   oc2te    <- readGDX(gdx,c("pc2te","oc2te"),format="first_found")
   
   # the set liquids changed from sepet+sedie to seLiq in REMIND 1.7. Seliq, sega and seso changed to include biomass or Fossil origin after REMIND 2.0
-  se_Liq    <- intersect(c("seliqfos", "seliqbio", "seliq", "sepet","sedie"),sety)
-  se_Gas    <- intersect(c("segafos", "segabio", "sega"),sety)
+  # also added seliqsyn and segasyn for synthetic liquids and gases from CCU
+  se_Liq    <- intersect(c("seliqfos", "seliqbio","seliqsyn", "seliq", "sepet","sedie"),sety)
+  se_Gas    <- intersect(c("segafos", "segabio","segasyn", "sega"),sety)
   se_Solids <- intersect(c("sesofos", "sesobio", "seso"),sety)
   
   # Gases and Liquids can also be made from H2 via CCU
@@ -101,12 +102,12 @@ reportSE <- function(gdx,regionSubsetList=NULL){
       warning(paste("se.output ", setdiff(se.output, abind::abind(all_pety,sety)), " is not element of pety or sety"))
     ## identify all techs with secarrier as a main product
     # sub1_oc2te <- oc2te[(oc2te$all_enty %in% pecarrier) & (oc2te$all_enty1 %in% secarrier) & (oc2te$all_enty2 %in% sety)    & (oc2te$all_te %in% te),]
-    ## secondary energy production with secarrier as a main product
-    x1 <- dimSums(mselect(prodSe,all_enty=enty.input,all_enty1=se.output,all_te=te),dim=3)
+    ## secondary energy production with secarrier as a main product, remove NA in sum -> drops old tech mappings which are not used anymore
+    x1 <- dimSums(mselect(prodSe,all_enty=enty.input,all_enty1=se.output,all_te=te),dim=3, na.rm = T)
     ## secondary energy production with secarrier as a couple product
     ## identify all oc techs with secarrier as a couple product
     sub_oc2te <- oc2te[(oc2te$all_enty %in% enty.input) & (oc2te$all_enty1 %in% sety)    & (oc2te$all_enty2 %in% se.output) & (oc2te$all_te %in% te),]
-    x2 <- dimSums(prodSe[sub_oc2te]*dataoc[sub_oc2te],dim=3)
+    x2 <- dimSums(prodSe[sub_oc2te]*dataoc[sub_oc2te],dim=3, na.rm = T)
 
     ## storage losses
     input.pe2se <- pe2se[(pe2se$all_enty %in% enty.input) & (pe2se$all_enty1 %in% se.output) & (pe2se$all_te %in% te),]
@@ -212,7 +213,7 @@ reportSE <- function(gdx,regionSubsetList=NULL){
     se.prod(prodSe,dataoc,oc2te,sety,pebio,se_Gas, te = tenoccs,         name = "SE|Gases|Biomass|w/o CCS (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,"pecoal",se_Gas, te = teccs,        name = "SE|Gases|Coal|w/ CCS (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,"pecoal",se_Gas, te = tenoccs,      name = "SE|Gases|Coal|w/o CCS (EJ/yr)"),
-    se.prod(prodSe,dataoc,oc2te,sety,"seh2",se_Gas,                      name = "SE|Gases|Hydrogen (EJ/yr)"),
+    se.prod(prodSe,dataoc,oc2te,sety,"seh2",se_Gas,                   name = "SE|Gases|Hydrogen (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,pety,"sehe",                        name = "SE|Heat (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,pebio,"sehe",                       name = "SE|Heat|Biomass (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,"pecoal","sehe",                    name = "SE|Heat|Coal (EJ/yr)"),
