@@ -831,6 +831,24 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     )
     ### -------------- Felix's ETS/ESD GHG reporting ------------------------
     
+    ### intialized variables used in following dplyr pipes, 
+    # only needed for being able to build library
+    
+    region <- NULL
+    period <- NULL
+    all_enty <- NULL
+    all_enty1 <- NULL
+    all_enty2 <- NULL
+    all_emiMkt <- NULL
+    emi_sectors <- NULL
+    all_te <- NULL
+    emiFac <- NULL
+    emi <- NULL
+    value <- NULL
+    
+    ### end initialization
+
+    
     # constants
     s_GWP_CH4 <- readGDX(gdx,c("sm_gwpCH4","s_gwpCH4","s_GWP_CH4"),format="first_found", react = "silent")
     s_GWP_N2O <- readGDX(gdx,c("s_gwpN2O","s_GWP_N2O"),format="first_found")
@@ -848,13 +866,13 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     vm_emiIndCCS   <- readGDX(gdx,name=c("vm_emiIndCCS"),field="l",format="first_found",restore_zeros=FALSE)
     # non-energy emissions
     vm_emiMacSector <- readGDX(gdx, "vm_emiMacSector", field = "l", restore_zeros = F)
-    # mac sector to emission market mapping
+    # mapping mac sector to emission market (EST/ETS)
     macSector2emiMkt <- readGDX(gdx, "macSector2emiMkt")
-    # map mac sectors to "reporting" sectors
+    # mapping mac sector to "reporting" sectors
     emiMac2sector <- readGDX(gdx, "emiMac2sector")
     
     # calculate non-energy/process GHG emissions (MAC emissions) per emissions market
-    df.nonEn.Emi <- as.quitte(vm_emiMacSector[,,emiMacSector2emiMac$all_enty]) %>% 
+    df.nonEn.Emi <- as.quitte(vm_emiMacSector[,,emiMac2sector$all_enty]) %>% 
                       left_join(macSector2emiMkt) %>% 
                       left_join(emiMac2sector) %>%     
                       # conversion to MtCO2eq (unit conversion and global warming potential)
@@ -870,7 +888,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     EmiNonenSector <- as.magpie(df.nonEn.Emi, spatial = 1, temporal = 2, datacol=5)
    
     # calculate energy demand-side GHG emissions per emissions market
-    # (multiply sectoral FE demand with emissions factors)
+    # (multiply sectoral FE demand with se2fe emission factors)
     df.en.Emi <- as.quitte(vm_demFeSector) %>% 
                         filter(period >= 2005) %>%  
                         left_join(as.quitte(pm_emifac) %>% 
@@ -897,7 +915,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     EmiEnSector <- as.magpie(df.en.Emi, spatial = 1, temporal = 2, datacol=5)
     
     
-    ### calculate industry ETS and ESD emissions
+    ### report industry ETS and ESD emissions
 
     # Industry ETS energy GHG emissions:
     # all se2fe ESM industry emissions of ETS - industry energy CCS 
