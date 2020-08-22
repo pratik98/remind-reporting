@@ -673,7 +673,6 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,         "Price|Secondary Energy|Gases (US$2005/GJ)"))
     tmp <- mbind(tmp,setNames(sebal.m[,,"segabio"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Biomass (US$2005/GJ)"))
     tmp <- mbind(tmp,setNames(sebal.m[,,"segafos"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Fossil (US$2005/GJ)"))
-    tmp <- mbind(tmp,setNames(sebal.m[,,"segasyn"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Synthetic (CCU) (US$2005/GJ)"))
     }
  
 #   # some precalculations
@@ -862,6 +861,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
                 "Price|Secondary Energy|Gases (US$2005/GJ)"               = "SE|Gases (EJ/yr)",
                 "Price|Secondary Energy|Heat (US$2005/GJ)"                = "SE|Heat (EJ/yr)",
                 "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"     = "SE|Liquids|Biomass (EJ/yr)",
+                "Price|Secondary Energy|Liquids|Synthetic (CCU) (US$2005/GJ)" = "SE|Liquids|Hydrogen (EJ/yr)",
                 "Price|Carbon|ETS (US$2005/t CO2)"                        = "Emi|CO2|ETS (Mt CO2/yr)",
                 "Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)" = "Emi|CO2|ES (Mt CO2/yr)"
                 
