@@ -232,7 +232,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   pebal.m        <- readGDX(gdx,name=c("q_balPe","qm_pebal"),types = "equations",field = "m",format = "first_found")[,,pebal_subset]
   budget.m       <- readGDX(gdx,name='qm_budget',types = "equations",field = "m",format = "first_found") # Alternative: calcPrice
   sebal.m        <- readGDX(gdx,name=c("q_balSe","q_sebal"),types="equations",field="m",format="first_found")
-  balcapture.m   <- readGDX(gdx,name=c("q_balcapture"), field = "m", restore_zeros = F)
+  balcapture.m   <- readGDX(gdx,name=c("q_balcapture", "q12_balcapture"), field = "m", restore_zeros = F)
   if (!is.null(power_realisation)) { 
     sebalSeel.m    <- readGDX(gdx,name="q32_balSe",types="equations",field="m",format="first_found") 
   }
@@ -570,8 +570,9 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   tmp <- mbind(tmp,setNames(abs(pm_pvpRegi / (pm_pvp[,,"good"] + 1e-10)) * 1000 * 12/44, "Price|Carbon (US$2005/t CO2)"))
   tmp <- mbind(tmp,setNames(abs(pm_taxCO2eq) * 1000 * 12/44, "Price|Carbon|Guardrail (US$2005/t CO2)"))
   
-  
-  tmp <- mbind(tmp, setNames(balcapture.m / (budget.m+1e-10) / 3.66 * 1e3, 
+  CaptureBal_tmp <- new.magpie(getRegions(tmp), getYears(tmp), fill = NA)
+  CaptureBal_tmp[,getYears(balcapture.m),] <- balcapture.m
+  tmp <- mbind(tmp, setNames(CaptureBal_tmp / (budget.m+1e-10) / 3.66 * 1e3, 
                "Price|Carbon|Captured (US$2005/t CO2)"))
   
   if (is.null(regionSubsetList$EUR)) { 
@@ -861,7 +862,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
                 "Price|Secondary Energy|Gases (US$2005/GJ)"               = "SE|Gases (EJ/yr)",
                 "Price|Secondary Energy|Heat (US$2005/GJ)"                = "SE|Heat (EJ/yr)",
                 "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"     = "SE|Liquids|Biomass (EJ/yr)",
-                "Price|Secondary Energy|Liquids|Synthetic (CCU) (US$2005/GJ)" = "SE|Liquids|Hydrogen (EJ/yr)",
+               # "Price|Secondary Energy|Liquids|Synthetic (CCU) (US$2005/GJ)" = "SE|Liquids|Hydrogen (EJ/yr)",
                 "Price|Carbon|ETS (US$2005/t CO2)"                        = "Emi|CO2|ETS (Mt CO2/yr)",
                 "Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)" = "Emi|CO2|ES (Mt CO2/yr)"
                 
