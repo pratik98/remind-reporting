@@ -232,6 +232,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   pebal.m        <- readGDX(gdx,name=c("q_balPe","qm_pebal"),types = "equations",field = "m",format = "first_found")[,,pebal_subset]
   budget.m       <- readGDX(gdx,name='qm_budget',types = "equations",field = "m",format = "first_found") # Alternative: calcPrice
   sebal.m        <- readGDX(gdx,name=c("q_balSe","q_sebal"),types="equations",field="m",format="first_found")
+  balcapture.m   <- readGDX(gdx,name=c("q_balcapture", "q12_balcapture"), field = "m", restore_zeros = F)
   if (!is.null(power_realisation)) { 
     sebalSeel.m    <- readGDX(gdx,name="q32_balSe",types="equations",field="m",format="first_found") 
   }
@@ -554,6 +555,10 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
     tmp <- mbind(tmp,setNames(sebal.m[,,"seliq"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|seliq (US$2005/GJ)" ))
   } else if ("sepet" %in% sety) {
     tmp <- mbind(tmp,setNames(sebal.m[,,"sepet"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|sepet (US$2005/GJ)" ))
+  } else if ("seliqsyn" %in% sety) {
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqbio"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|seliqbio (US$2005/GJ)" ))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqfos"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|seliqfos (US$2005/GJ)" ))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqsyn"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|seliqsyn (US$2005/GJ)" ))
   } else {
 	  tmp <- mbind(tmp,setNames(sebal.m[,,"seliqbio"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|seliqbio (US$2005/GJ)" ))
     tmp <- mbind(tmp,setNames(sebal.m[,,"seliqfos"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|SE|seliqfos (US$2005/GJ)" ))
@@ -564,6 +569,11 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   
   tmp <- mbind(tmp,setNames(abs(pm_pvpRegi / (pm_pvp[,,"good"] + 1e-10)) * 1000 * 12/44, "Price|Carbon (US$2005/t CO2)"))
   tmp <- mbind(tmp,setNames(abs(pm_taxCO2eq) * 1000 * 12/44, "Price|Carbon|Guardrail (US$2005/t CO2)"))
+  
+  CaptureBal_tmp <- new.magpie(getRegions(tmp), getYears(tmp), fill = NA)
+  CaptureBal_tmp[,getYears(balcapture.m),] <- balcapture.m
+  tmp <- mbind(tmp, setNames(CaptureBal_tmp / (budget.m+1e-10) / 3.66 * 1e3, 
+               "Price|Carbon|Captured (US$2005/t CO2)"))
   
   if (is.null(regionSubsetList$EUR)) { 
     tmp <- mbind(tmp,setNames(pm_taxCO2eq * 1000 * 12/44, "Price|Carbon|EU-wide Regulation For All Sectors (US$2005/t CO2)"))
@@ -613,12 +623,25 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
           dimSums(mselect(demSe,all_enty="sepet"),dim=3) * sebal.m[,,"sepet"]
     x2 <- dimSums(mselect(demSe,all_enty="sedie"),dim=3) + dimSums(mselect(demSe,all_enty="sepet"),dim=3)
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,               "Price|Secondary Energy|Liquids (US$2005/GJ)"))
+  } else if ("seliqsyn" %in% sety) {
+    x1 <- dimSums( dimSums(mselect(demSe,all_enty="seliqbio"),dim=3) * abs(sebal.m[,,"seliqbio"]) +
+                     dimSums(mselect(demSe,all_enty="seliqfos"),dim=3) * abs(sebal.m[,,"seliqfos"]) +
+                     dimSums(mselect(demSe,all_enty="seliqsyn"),dim=3) * abs(sebal.m[,,"seliqsyn"]))
+    x2 <- dimSums(mselect(demSe,all_enty="seliqbio"),dim=3) + 
+          dimSums(mselect(demSe,all_enty="seliqfos"),dim=3) + 
+          dimSums(mselect(demSe,all_enty="seliqsyn"),dim=3)
+    tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,               "Price|Secondary Energy|Liquids (US$2005/GJ)"))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqbio"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqfos"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Liquids|Fossil (US$2005/GJ)"))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqsyn"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Liquids|Synthetic (CCU) (US$2005/GJ)"))
   } else {
 	  x1 <- dimSums( dimSums(mselect(demSe,all_enty="seliqbio"),dim=3) * abs(sebal.m[,,"seliqbio"]) +
           dimSums(mselect(demSe,all_enty="seliqfos"),dim=3) * abs(sebal.m[,,"seliqfos"]) )
 	  x2 <- dimSums(mselect(demSe,all_enty="seliqbio"),dim=3) + dimSums(mselect(demSe,all_enty="seliqfos"),dim=3)
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,               "Price|Secondary Energy|Liquids (US$2005/GJ)"))
-  }
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqbio"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"seliqfos"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Liquids|Fossil (US$2005/GJ)"))
+  } 
   
   if ("seso" %in% sety) {
     tmp <- mbind(tmp,setNames(sebal.m[,,"seso"]/(budget.m+1e-10) * tdptwyr2dpgj ,       	"Price|Secondary Energy|Solids (US$2005/GJ)"))
@@ -628,30 +651,46 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
     x2 <- dimSums(mselect(demSe,all_enty="sesobio"),dim=3) + dimSums(mselect(demSe,all_enty="sesofos"),dim=3)
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,			"Price|Secondary Energy|Solids (US$2005/GJ)"))
     tmp <- mbind(tmp,setNames(sebal.m[,,"sesobio"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|Secondary Energy|Solids|Biomass (US$2005/GJ)"))
-  #  tmp <- mbind(tmp,setNames(sebal.m[,,"sesofos"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|Secondary Energy|Solids|Fossils (US$2005/GJ)"))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"sesofos"]/(budget.m+1e-10)*tdptwyr2dpgj, "Price|Secondary Energy|Solids|Fossil (US$2005/GJ)"))
   }
   
   if ("sega" %in% sety) {
     tmp <- mbind(tmp,setNames(sebal.m[,,"sega"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases (US$2005/GJ)"))
-  } else {
+  } else if ("segasyn" %in% sety) {
+      x1 <- dimSums( dimSums(mselect(demSe,all_enty="segabio"),dim=3) * abs(sebal.m[,,"segabio"]) +
+                       dimSums(mselect(demSe,all_enty="segafos"),dim=3) * abs(sebal.m[,,"segafos"]) +
+                       dimSums(mselect(demSe,all_enty="segasyn"),dim=3) * abs(sebal.m[,,"segasyn"]))
+      x2 <- dimSums(mselect(demSe,all_enty="segabio"),dim=3) + 
+        dimSums(mselect(demSe,all_enty="segafos"),dim=3) + 
+        dimSums(mselect(demSe,all_enty="segasyn"),dim=3)
+      tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,               "Price|Secondary Energy|Gases (US$2005/GJ)")) 
+      tmp <- mbind(tmp,setNames(sebal.m[,,"segabio"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Biomass (US$2005/GJ)"))
+      tmp <- mbind(tmp,setNames(sebal.m[,,"segafos"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Fossil (US$2005/GJ)"))
+      tmp <- mbind(tmp,setNames(sebal.m[,,"segasyn"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Synthetic (CCU) (US$2005/GJ)"))
+    } else {
 	  x1 <- dimSums( dimSums(mselect(demSe,all_enty="segabio"),dim=3) * abs(sebal.m[,,"segabio"]) +
           dimSums(mselect(demSe,all_enty="segafos"),dim=3) * abs(sebal.m[,,"segafos"]) )
     x2 <- dimSums(mselect(demSe,all_enty="segabio"),dim=3) + dimSums(mselect(demSe,all_enty="segafos"),dim=3)
     tmp <- mbind(tmp,setNames(x1/x2/(abs(budget.m) + 1e-10) * tdptwyr2dpgj,         "Price|Secondary Energy|Gases (US$2005/GJ)"))
-  }
+    tmp <- mbind(tmp,setNames(sebal.m[,,"segabio"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Biomass (US$2005/GJ)"))
+    tmp <- mbind(tmp,setNames(sebal.m[,,"segafos"]/(budget.m+1e-10) * tdptwyr2dpgj ,	"Price|Secondary Energy|Gases|Fossil (US$2005/GJ)"))
+    }
  
-  # some precalculations
-  if ("seliq" %in% sety) {
-    x1 <- sebal.m[,,"seliq"]/budget.m * tdptwyr2dpgj
-    x1[which(dimSums(mselect(prodSE,all_enty="pebiolc",all_enty1="seliq"),dim=3) < 1e-5)] <- 0
-  } else if ("sepet" %in% sety) {
-    x1 <- sebal.m[,,"sedie"]/budget.m * tdptwyr2dpgj
-    x1[which(dimSums(mselect(prodSE,all_enty="pebiolc",all_enty1="sedie"),dim=3) < 1e-5)] <- 0
-  } else {
-	  x1 <- sebal.m[,,"seliqbio"]/(budget.m+1e-10)*tdptwyr2dpgj
-  }
-  tmp <- mbind(tmp,setNames(x1, "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"))
-  
+#   # some precalculations
+#   if ("seliq" %in% sety) {
+#     x1 <- sebal.m[,,"seliq"]/budget.m * tdptwyr2dpgj
+#     x1[which(dimSums(mselect(prodSE,all_enty="pebiolc",all_enty1="seliq"),dim=3) < 1e-5)] <- 0
+#   } else if ("sepet" %in% sety) {
+#     x1 <- sebal.m[,,"sedie"]/budget.m * tdptwyr2dpgj
+#     x1[which(dimSums(mselect(prodSE,all_enty="pebiolc",all_enty1="sedie"),dim=3) < 1e-5)] <- 0
+#   } else {
+# 	  x1 <- sebal.m[,,"seliqbio"]/(budget.m+1e-10)*tdptwyr2dpgj
+# 	  # tmp <- mbind(tmp, setNames(sebal.m[,,"seliqfos"]/(budget.m+1e-10)*tdptwyr2dpgj,
+# 	  #              "Price|Secondary Energy|Liquids|Fossil (US$2005/GJ)"))
+#   }
+#   tmp <- mbind(tmp,setNames(x1, "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"))
+# 
+#   
   ## average prices
   
   # some precalculations
@@ -823,6 +862,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
                 "Price|Secondary Energy|Gases (US$2005/GJ)"               = "SE|Gases (EJ/yr)",
                 "Price|Secondary Energy|Heat (US$2005/GJ)"                = "SE|Heat (EJ/yr)",
                 "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"     = "SE|Liquids|Biomass (EJ/yr)",
+               # "Price|Secondary Energy|Liquids|Synthetic (CCU) (US$2005/GJ)" = "SE|Liquids|Hydrogen (EJ/yr)",
                 "Price|Carbon|ETS (US$2005/t CO2)"                        = "Emi|CO2|ETS (Mt CO2/yr)",
                 "Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)" = "Emi|CO2|ES (Mt CO2/yr)"
                 
