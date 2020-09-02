@@ -965,6 +965,13 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                              tmp[,,"Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"],
                            "Emi|GHG|Industry|ESD (Mt CO2-equiv/yr)")
     )
+    
+    # total industry GHG emissions
+    tmp <- mbind(tmp,
+                 # total industry (after Industry CCS)
+                 setNames( tmp[,,"Emi|GHG|Industry|ETS (Mt CO2-equiv/yr)"] +
+                             tmp[,,"Emi|GHG|Industry|ESD (Mt CO2-equiv/yr)"],
+                           "Emi|GHG|Industry (Mt CO2-equiv/yr)"))
                  
                  
     ### extraction sector (process/non-energy) GHG emissions (fugitive emissions)
