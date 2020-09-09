@@ -31,7 +31,7 @@
 
 compareScenarios <- function(mif, hist,
                              y=c(seq(2005,2060,5),seq(2070,2100,10)),
-                             y_hist=c(seq(1960,2015,1)),
+                             y_hist=c(seq(1960,2020,1), seq(2025,2100,5)),
                              y_bar=c(2010,2030,2050,2100),
                              reg=NULL, mainReg="GLO", fileName="CompareScenarios.pdf",
                              sr15marker_RCP=NULL) {
@@ -208,6 +208,7 @@ compareScenarios <- function(mif, hist,
 
   ## read historical data
   hist <- read.report(hist,as.list=FALSE)
+  y_hist <- intersect(y_hist, getYears(hist, as.integer=TRUE))
   if(all(getRegions(data) %in% getRegions(hist))) {
     hist = hist[getRegions(data),,]
     if ( any(grepl("EDGE_SSP2",getNames(hist)))){
@@ -908,11 +909,17 @@ compareScenarios <- function(mif, hist,
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
   swlatex(sw,"\\subsection{GDP - MER}")
-  p <- mipLineHistorical(data[mainReg,,"GDP|MER (billion US$2005/yr)"],x_hist=NULL,
-                         ylab='GDP|MER [billion US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  p <- mipLineHistorical(data[mainReg,,"GDP|MER (billion US$2005/yr)"],
+                         x_hist=if("GDP|MER (billion US$2005/yr)" %in% getNames(hist,dim=3)) hist[mainReg,,"GDP|MER (billion US$2005/yr)"] else NULL,
+                         ylab='GDP|MER [billion US$2005/yr]',
+                         scales="free_y",
+                         plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"GDP|MER (billion US$2005/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='GDP|MER [billion US$2005/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  p <- mipLineHistorical(data[,,"GDP|MER (billion US$2005/yr)"][mainReg,,,invert=TRUE],
+                         x_hist=if("GDP|MER (billion US$2005/yr)" %in% getNames(hist,dim=3)) hist[,,"GDP|MER (billion US$2005/yr)"][mainReg,,,invert=TRUE] else NULL,
+                         ylab='GDP|MER [billion US$2005/yr]',scales="free_y",
+                         plot.priority=c("x_hist","x","x_proj"),
+                         facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
   swlatex(sw,"\\subsection{GDP - PPP}")
