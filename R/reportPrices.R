@@ -820,6 +820,46 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   int2ext_prices_ces = gsub("\\(Net of depreciation\\)","(billion US$2005)",int2ext_prices_ces)
   names(int2ext_prices_ces) = prices_ces_names
   
+  
+  
+  
+  ### FS: Final Energy Prices for REMIND-EU
+  
+  FeTrans.m <- readGDX(gdx, "q35_demFeTrans", field = "m", restore_zeros = F)
+  FeBuild.m <- readGDX(gdx, "q36_demFeBuild", field = "m", restore_zeros = F)
+  FeIndst.m <- readGDX(gdx, "q37_demFeIndst", field = "m", restore_zeros = F)
+  
+
+  tmp <- mbind(tmp, 
+                # Transport Liquids
+                setNames(FeTrans.m[,,"fepet.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeTrans.m[,,"fedie.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Liquids|Transport|HDV|w/ costs for emissions|ESD (US$2005/GJ)"),
+                # Stationary Liquids (Heating Oil)
+                setNames(FeBuild.m[,,"fehos.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Heating Oil|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeIndst.m[,,"fehos.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeIndst.m[,,"fehos.ETS"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ETS (US$2005/GJ)"),
+                # Stationary Gases
+                setNames(FeBuild.m[,,"fegas.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Gases|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeIndst.m[,,"fegas.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeIndst.m[,,"fegas.ETS"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Gases|Industry|w/ costs for emissions|ETS (US$2005/GJ)"),
+                # Stationary Solids
+                setNames(FeBuild.m[,,"fesos.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Solids|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeIndst.m[,,"fesos.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Solids|Industry|w/ costs for emissions|ESD (US$2005/GJ)"),
+                setNames(FeIndst.m[,,"fesos.ETS"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                         "Price|Final Energy|Solids|Industry|w/ costs for emissions|ETS (US$2005/GJ)"))
+  
+  
+  
     # mapping of weights for the variables for global aggregation
   int2ext <- c(
                 "Price|Biomass|Primary Level (US$2005/GJ)"                = "PE|+|Biomass (EJ/yr)",
@@ -1069,7 +1109,6 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
       mbind(y, dimSums(y, dim = 1) * NA)
     )
   }
-  
   
   
   return(tmp)
