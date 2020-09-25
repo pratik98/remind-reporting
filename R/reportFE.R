@@ -39,9 +39,8 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   sety <- readGDX(gdx,c("entySe","sety"),format="first_found")
   
   # the set liquids changed from sepet+sedie to seLiq in REMIND 1.7. Seliq, sega and seso changed to include biomass or Fossil origin after REMIND 2.0
-  # also added seliqsyn and segasyn for synthetic liquids and gases from CCU
-  se_Liq    <- intersect(c("seliqfos", "seliqbio","seliqsyn", "seliq", "sepet","sedie"),sety)
-  se_Gas    <- intersect(c("segafos", "segabio","segasyn", "sega"),sety)
+  se_Liq    <- intersect(c("seliqfos", "seliqbio", "seliq", "sepet","sedie"),sety)
+  se_Gas    <- intersect(c("segafos", "segabio", "sega"),sety)
   se_Solids <- intersect(c("sesofos", "sesobio", "seso"),sety)
   
   se2fe <- readGDX(gdx,"se2fe")
@@ -75,6 +74,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   
   ## parameter
   p_eta_conv = readGDX(gdx, c("pm_eta_conv","p_eta_conv"), restore_zeros = FALSE,format="first_found")
+  pm_cesdata = readGDX(gdx,"pm_cesdata")
   s33_rockgrind_fedem <- readGDX(gdx,"s33_rockgrind_fedem", react = "silent")
   if (is.null(s33_rockgrind_fedem)){
     s33_rockgrind_fedem  <- new.magpie("GLO",NULL,fill=0)
@@ -115,10 +115,15 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
     tran_mod = "complex"
   }
 
+  if (buil_mod %in% c("services_putty", "services_with_capital")){
+    p36_floorspace <- readGDX(gdx,"p36_floorspace")
+  }
   ####### calculate minimal temporal resolution #####
   y <- Reduce(intersect,list(getYears(prodFE),getYears(prodSE)))
   prodFE  <- prodFE[,y,]
   prodSE <- prodSE[,y,]
+  vm_cesIO <- vm_cesIO[,y,]
+  if (0 < length(v_prodEs)) v_prodEs <- v_prodEs[,y,]
   vm_otherFEdemand <- vm_otherFEdemand[,y,]
   v33_grindrock_onfield<- v33_grindrock_onfield[,y,]
   p35_bunker_share_in_nonldv_fe <- p35_bunker_share_in_nonldv_fe[,y,]
@@ -128,7 +133,14 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
 
   ####### calculate reporting parameters ############
   tmp0 <- NULL
-  vm_cesIO = vm_cesIO[,y,]
+
+  if (any(grep('\\.offset_quantity$', getNames(pm_cesdata)))) {
+    # Correct for offset quantities in the transition between ESM and CES for zero quantities
+    pf <- paste0(getNames(vm_cesIO), '.offset_quantity')
+    offset <- collapseNames(pm_cesdata[,,pf]) * TWa_2_EJ
+    vm_cesIO = vm_cesIO + offset[,y,getNames(vm_cesIO)]
+  }
+  
   #--- Stationary Module ---
   if (stat_mod == "simple"){
     tmp0 <- mbind(tmp0,
@@ -161,7 +173,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   
   if (buil_mod %in% c("services_putty", "services_with_capital")){
     
-    
+    p36_floorspace <- p36_floorspace[,y,]
     vm_demFeForEs = vm_demFeForEs[fe2es]
     
     ces_elec = c(grep("elb$", ppfen_build, value = T),grep("hpb$", ppfen_build, value = T))
@@ -275,6 +287,10 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                                             "FE|Buildings|Space Heating|Hydrogen (EJ/yr)")],dim=3),        "FE|Buildings|Space Heating (EJ/yr)")
                   
     )
+    
+    tmp0 <-  mbind(tmp0,
+                   setNames(p36_floorspace,        "Energy Service|Buildings|Floor Space (bn m2/yr)")
+                   )
   }
   
 
@@ -365,7 +381,27 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                                                       'feelwlth_chemicals',
                                                       'feel_steel_primary',
                                                       'feel_steel_secondary',
-                                                      'feelwlth_otherInd')
+                                                      'feelwlth_otherInd'),
+      
+      # subsector totals
+      'Cement' = c('feso_cement', 'feli_cement', 'fega_cement', 'feh2_cement',
+                   'feh2_cement', 'feel_cement'),
+      
+      'Chemicals' = c('feso_chemicals', 'feli_chemicals', 'fega_chemicals', 
+                      'feh2_chemicals', 'feelhth_chemicals', 
+                      'feelwlth_chemicals'),
+      
+      'Steel' = c('feso_steel', 'feli_steel', 'fega_steel', 'feh2_steel', 
+                  'feel_steel_primary', 'feel_steel_secondary'),
+      
+      'Steel|Primary' = c('feso_steel', 'feli_steel', 'fega_steel', 
+                          'feh2_steel', 'feel_steel_primary'),
+      
+      'Steel|Secondary' = 'feel_steel_secondary',
+
+      'other' = c('feso_otherInd', 'feli_otherInd', 'fega_otherInd', 
+                  'feh2_otherInd', 'fehe_otherInd', 'feelhth_otherInd', 
+                  'feelwlth_otherInd')
     )
 
     # list of production items to calculate, including factor for unit conversion
@@ -419,6 +455,29 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
         + tmp0[,,'Production|Industry|Steel|Secondary (Mt/yr)'],
         'Production|Industry|Steel (Mt/yr)')
     )
+   
+    # calculate specific energy consumption of industrial production
+    tmp0 <- mbind(
+      tmp0,
+      
+      setNames(
+        # EJ/yr / Mt/yr * 1e12 MJ/EJ / (1e6 t/Mt) = MJ/t
+        ( tmp0[,,'FE|Industry|Cement (EJ/yr)']
+        / tmp0[,,'Production|Industry|Cement (Mt/yr)']
+        ) * 1e6,
+        
+        'Specific Energy Consumption|Production|Cement (MJ/t)'
+      ),
+      
+      setNames(
+        # EJ/yr / Mt/yr * 1e12 MJ/EJ / (1e6 t/Mt) = MJ/t
+        ( tmp0[,,'FE|Industry|Steel (EJ/yr)']
+        / tmp0[,,'Production|Industry|Steel (Mt/yr)']
+        ) * 1e6,
+        
+        'Specific Energy Consumption|Production|Steel (MJ/t)'
+      )
+    )
     
   }
   
@@ -429,7 +488,8 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
         ( dimSums(vm_cesIO[,,ppfen_ind], dim = 3) ),  'FE|Industry (EJ/yr)'),
       
       setNames(
-        ( dimSums(vm_cesIO[,,c(ppfen_build, ppfen_ind)], dim = 3)
+        ( dimSums(vm_cesIO[,,c(ppfen_ind)], dim = 3) 
+          + tmp0[,,'FE|Buildings (EJ/yr)']
           + vm_otherFEdemand[,,'feels'] 
           + vm_otherFEdemand[,,'fegas'] 
           + vm_otherFEdemand[,,'feh2s']
@@ -439,6 +499,17 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
     )
   }
   
+  # add Industry electricity share (for SDG targets)
+  tmp0 <- mbind(
+    tmp0,
+    setNames(
+        tmp0[,,'FE|Industry|Electricity (EJ/yr)'] 
+      / tmp0[,,'FE|Industry (EJ/yr)']
+      * 100,
+      'FE|Industry|Electricity|Share (%)')
+  )
+  
+  # ----
   tmp1 <- NULL 
   tmp1 <- mbind(tmp0,
                 setNames(dimSums(prodFE[,,se_Solids],dim=3),  "FE|+|Solids (EJ/yr)"),
@@ -507,7 +578,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                   setNames(dimSums(demFE[,,"apCarElT"],dim=3),           "FE|Transport|Pass|Road|LDV|Electricity (EJ/yr)"),    
                   setNames(dimSums(prodFE[,,FE_Transp_fety35],dim=3) 
                            -dimSums(demFE[,,LDV35],dim=3) - vm_otherFEdemand[,,'fedie'],               "FE|Transport|non-LDV (EJ/yr)"),
-                  setNames(dimSums(vm_cesIO[,,name_trsp_LDV],dim=3) * p35_passLDV_ES_efficiency,            "ES|Transport|Pass|LDV (bn pkm/yr)"),
+                  setNames(dimSums(vm_cesIO[,,name_trsp_LDV],dim=3) * p35_passLDV_ES_efficiency,            "ES|Transport|Pass|Road|LDV (bn pkm/yr)"),
                   setNames(dimSums(vm_cesIO[,,name_trsp_LDV],dim=3),            "UE|Transport|LDV (EJ/yr)"),
                   setNames(dimSums(vm_cesIO[,,name_trsp_HDV],dim=3),            "UE|Transport|HDV (EJ/yr)"),
                   NULL
@@ -630,6 +701,22 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                  setNames(tmp1[,,"FE|Buildings|Electricity (EJ/yr)"] + tmp1[,,"FE|Industry|Electricity (EJ/yr)"]+ tmpCDR4[,,"FE|CDR|Electricity (EJ/yr)"],"FE|Other Sector|Electricity (EJ/yr)"),
                  setNames(tmp1[,,"FE|Buildings|Heat (EJ/yr)"] + tmp1[,,"FE|Industry|Heat (EJ/yr)"],"FE|Other Sector|Heat (EJ/yr)")
                  )
+    if("segabio" %in% se_Gas){
+      tmp2 <- mbind(tmp2,
+                 setNames(dimSums(prodFE[,,"segabio.fegas.tdbiogas"],dim=3),"FE|Other Sector|Gases|Biomass (EJ/yr)"),
+                 setNames(dimSums(prodFE[,,"segafos.fegas.tdfosgas"],dim=3),"FE|Other Sector|Gases|Non-Biomass (EJ/yr)"),
+                 setNames(dimSums(prodFE[,,c("seliqbio.fedie.tdbiodie", "seliqbio.fepet.tdbiopet")],dim=3),"FE|Transport|Liquids|Biomass (EJ/yr)"),
+                 setNames(dimSums(prodFE[,,c("seliqfos.fedie.tdfosdie", "seliqfos.fepet.tdfospet")],dim=3),"FE|Transport|Liquids|Non-Biomass (EJ/yr)")
+                 )
+    }
+
+    if("fegat" %in% fety && "segabio" %in% se_Gas){
+      tmp2 <- mbind(tmp2,
+                 setNames(dimSums(prodFE[,,"segabio.fegat.tdbiogat"],dim=3),"FE|Transport|Gases|Biomass (EJ/yr)"),
+                 setNames(dimSums(prodFE[,,"segafos.fegat.tdfosgat"],dim=3),"FE|Transport|Gases|Non-Biomass (EJ/yr)")
+                 )
+
+    }
   }
     
     tmp2 = mbind(tmp2,
@@ -670,9 +757,9 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
     )  
 
     tmp4 <- mbind(tmp3,
-                  setNames(tmp3[,,"ES|Transport|Pass|LDV (bn pkm/yr)"] + tmp3[,,"ES|Transport|Pass|non-LDV (bn pkm/yr)"],"ES|Transport|Pass (bn pkm/yr)")
+                  setNames(tmp3[,,"ES|Transport|Pass|Road|LDV (bn pkm/yr)"] + tmp3[,,"ES|Transport|Pass|non-LDV (bn pkm/yr)"],"ES|Transport|Pass (bn pkm/yr)")
     )     
-  } else {
+  }else{
     # we add no entries here for now. *TODO* check if these entries are used, e.g., in exoGAINSairpollutants, to sum up fes.
     tmp4 <- tmp2
   }

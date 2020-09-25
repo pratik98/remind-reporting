@@ -391,11 +391,10 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   tmp = compute_agg_price_fe(tmp,output,"Transport")
   
   #Final energy prices
-  #if(!(is.null(balfinen.m))){
-    a = abs(mselect(balfinen.m[,y,][rbind(finenbal,fe2es)]))/abs((budget.m+1e-10)) # Translate the marginal utility of the constraint into the marginal income (price)
-    b = complete_magpie(a) # Due to a strange behaviour of magclass objects addition, we need to use complete_magpie to make the addition
-    prices_fe_bi = (b + mbind(fe_taxCES[,y,getColValues(finenbal,"all_in")],
-                              fe_taxES[,y,getColValues(fe2es,"all_in")])
+  a = abs(mselect(balfinen.m[,y,][rbind(finenbal,fe2es)]))/abs((budget.m+1e-10)) # Translate the marginal utility of the constraint into the marginal income (price)
+  b = complete_magpie(a) # Due to a strange behaviour of magclass objects addition, we need to use complete_magpie to make the addition
+  prices_fe_bi = (b + mbind(fe_taxCES[,y,getColValues(finenbal,"all_in")],
+                            fe_taxES[,y,getColValues(fe2es,"all_in")])
                     + mbind(fe_subCES[,y,getColValues(finenbal,"all_in")],
                             fe_subES[,y,getColValues(fe2es,"all_in")])) * tdptwyr2dpgj  # add the taxes and subsidies for the prices of buildings and industry. For transport, they are in the marginal of febal
   prices_fe_bi = prices_fe_bi[,,getNames(a)]

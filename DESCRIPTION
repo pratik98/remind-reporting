@@ -1,7 +1,7 @@
 Package: remind
 Type: Package
 Title: The REMIND R package
-Version: 36.159.2
+Version: 36.159.3
 Date: 2020-09-10
 Author: Anastasis Giannousakis, Michaja Pehl
 Maintainer: Anastasis Giannousakis <giannou@pik-potsdam.de>
@@ -11,35 +11,37 @@ Depends:
     magclass(>= 3.37)
 Imports:
     abind,
+    data.table,
     dplyr,
     flexdashboard,
+    gdxdt,
+    gdxrrw,
+    ggplot2,
+    highcharter,
+    iamc,
     knitr,
-    lucode,
+    lubridate,
+    lucode2,
     luplot,
     luscale,
     lusweave,
     madrat,
+    magpie,
     mip,
-    iamc,
+    plotly,
     quitte,
+    RColorBrewer,
     readr,
+    remulator,
     reshape2,
     rlang,
-    tidyr,
-    remulator,
-    magpie,
-    ggplot2,
     rmarkdown,
-    RColorBrewer,
+    rmndt,
     scales,
-    highcharter,
-    lubridate,
-    plotly,
-    data.table,
-    rmndt
+    tidyr
 Encoding: UTF-8
 License: LGPL-3
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests:
 	testthat,
 	sr15data
