@@ -903,7 +903,19 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
                 "Price|Secondary Energy|Liquids|Biomass (US$2005/GJ)"     = "SE|Liquids|Biomass (EJ/yr)",
                # "Price|Secondary Energy|Liquids|Synthetic (CCU) (US$2005/GJ)" = "SE|Liquids|Hydrogen (EJ/yr)",
                 "Price|Carbon|ETS (US$2005/t CO2)"                        = "Emi|CO2|ETS (Mt CO2/yr)",
-                "Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)" = "Emi|CO2|ES (Mt CO2/yr)"
+                "Price|Carbon|National Climate Target Non-ETS (US$2005/t CO2)" = "Emi|CO2|ES (Mt CO2/yr)",
+
+                "Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Transport|Pass|ESD|Liquids (EJ/yr)",
+                "Price|Final Energy|Liquids|Transport|HDV|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Transport|Freight|ESD|Liquids (EJ/yr)",
+                "Price|Final Energy|Heating Oil|Buildings|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Buildings|Liquids (EJ/yr)",
+                "Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Industry|ESD|Liquids (EJ/yr)",
+                "Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ETS (US$2005/GJ)" = "FE|Industry|ETS|Liquids (EJ/yr)",
+                "Price|Final Energy|Gases|Buildings|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Buildings|Gases (EJ/yr)",
+                "Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Industry|ESD|Gases (EJ/yr)",
+                "Price|Final Energy|Gases|Industry|w/ costs for emissions|ETS (US$2005/GJ)" = "FE|Industry|ETS|Gases (EJ/yr)",
+                "Price|Final Energy|Solids|Buildings|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Buildings|Solids (EJ/yr)",
+                "Price|Final Energy|Solids|Industry|w/ costs for emissions|ESD (US$2005/GJ)" = "FE|Industry|ESD|Solids (EJ/yr)",
+                "Price|Final Energy|Solids|Industry|w/ costs for emissions|ETS (US$2005/GJ)" = "FE|Industry|ETS|Solids (EJ/yr)"
                 
               )
 

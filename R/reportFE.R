@@ -91,6 +91,8 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   v_prodEs <- readGDX(gdx,name = c("v_prodEs"), field="l",restore_zeros = F, format = "first_found", react = "silent") * TWa_2_EJ
   vm_prodUe <- readGDX(gdx,name=c("vm_prodUe"),field="l",restore_zeros=FALSE,format="first_found")*TWa_2_EJ
   
+  vm_demFeSector <- readGDX(gdx,name=c("vm_demFeSector"),field="l",format="first_found",restore_zeros=FALSE)*TWa_2_EJ
+  
   v33_grindrock_onfield  <- readGDX(gdx,name=c("v33_grindrock_onfield"),field="l",format="first_found",react = "silent")
   if (is.null(v33_grindrock_onfield)){
     v33_grindrock_onfield  <- new.magpie(getRegions(vm_otherFEdemand),getYears(vm_otherFEdemand),rlf,fill=0)
@@ -127,6 +129,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   vm_otherFEdemand <- vm_otherFEdemand[,y,]
   v33_grindrock_onfield<- v33_grindrock_onfield[,y,]
   p35_bunker_share_in_nonldv_fe <- p35_bunker_share_in_nonldv_fe[,y,]
+  if(!is.null(vm_demFeSector)) vm_demFeSector <- vm_demFeSector[,y,]
   
   ######## compute sets for summation below ######
   setSolBio <- dplyr::filter_(pe2se, ~all_enty %in% pebio, ~all_enty1 %in% se_Solids)
@@ -799,6 +802,130 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
                 setNames(tmp4[,,"FE|Transport|Liquids (EJ/yr)"] + tmp4[,,"FE|Transport|Hydrogen (EJ/yr)"], "FE|Transport|Fuels (EJ/yr)"),
                 setNames(tmp4[,,"FE (EJ/yr)"] - tmp4[,,"FE|+|Electricity (EJ/yr)"] - tmp4[,,"FE|+|Heat (EJ/yr)"], "FE|Fuels (EJ/yr)") 
   )
+  
+  #create ETS and ESD variables
+  if(!is.null(vm_demFeSector)) {
+    
+    tmp6 <- mbind(tmp5,
+      
+      #industry
+      #setNames((dimSums(mselect(vm_demFeSector,emi_sectors="indst")  ,dim=3)), "FE|Industry (EJ/yr)"),
+
+      # industry liquids
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",emi_sectors="indst")  ,dim=3)), "FE|Industry|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Liquids (EJ/yr)"),
+      
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqbio",emi_sectors="indst")  ,dim=3)), "FE|Industry|Liquids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqbio",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Liquids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqbio",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Liquids|Biomass (EJ/yr)"),
+      
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqfos",emi_sectors="indst")  ,dim=3)), "FE|Industry|Liquids|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqfos",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Liquids|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqfos",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Liquids|Fossil (EJ/yr)"),
+      
+      # industry solids
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",emi_sectors="indst")  ,dim=3)), "FE|Industry|Solids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Solids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Solids (EJ/yr)"),
+      
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqbio",emi_sectors="indst")  ,dim=3)), "FE|Industry|Solids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqbio",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Solids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqbio",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Solids|Biomass (EJ/yr)"),
+      
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqfos",emi_sectors="indst")  ,dim=3)), "FE|Industry|Solids|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqfos",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Solids|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqfos",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Solids|Fossil (EJ/yr)"),
+      
+      # industry gases
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",emi_sectors="indst")  ,dim=3)), "FE|Industry|Gases (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Gases (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Gases (EJ/yr)"),
+      
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty1="seliqbio",emi_sectors="indst")  ,dim=3)), "FE|Industry|Gases|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqbio",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Gases|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqbio",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Gases|Biomass (EJ/yr)"),
+      
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqfos",emi_sectors="indst")  ,dim=3)), "FE|Industry|Gases|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqfos",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Gases|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqfos",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Gases|Fossil (EJ/yr)"),
+      
+      # industry electricity
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="feels",emi_sectors="indst")  ,dim=3)), "FE|Industry|Electricity (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feels",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Electricity (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feels",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Electricity (EJ/yr)"),
+      
+      # industry heat
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehes",emi_sectors="indst")  ,dim=3)), "FE|Industry|Heat (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehes",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Heat (EJ/yr)"),
+      
+      # industry hydrogen
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="feh2s",emi_sectors="indst")  ,dim=3)), "FE|Industry|Hydrogen (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feh2s",emi_sectors="indst", all_emiMkt="ES")  ,dim=3)), "FE|Industry|ESD|Hydrogen (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feh2s",emi_sectors="indst", all_emiMkt="ETS")  ,dim=3)), "FE|Industry|ETS|Hydrogen (EJ/yr)"),
+      
+      #transport
+      #setNames((dimSums(mselect(vm_demFeSector,emi_sectors="trans")  ,dim=3)), "FE|Transport (EJ/yr)"),
+      
+      # transport liquids
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1=c("fepet","fedie"),emi_sectors="trans")  ,dim=3)), "FE|Transport|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1=c("fepet","fedie"),emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|ESD|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1=c("fepet","fedie"),emi_sectors="trans", all_emiMkt="ETS")  ,dim=3)), "FE|Transport|ETS|Liquids (EJ/yr)"),
+      
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fepet",emi_sectors="trans")  ,dim=3)), "FE|Transport|Pass|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fepet",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|Pass|ESD|Liquids (EJ/yr)"),
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fepet",all_enty1="seliqbio",emi_sectors="trans")  ,dim=3)), "FE|Transport|Pass|Liquids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fepet",all_enty="seliqbio",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|Pass|ESD|Liquids|Biomass (EJ/yr)"),
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fepet",all_enty1="seliqfos",emi_sectors="trans")  ,dim=3)), "FE|Transport|Pass|Liquids|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fepet",all_enty="seliqfos",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|Pass|ESD|Liquids|Fossil (EJ/yr)"),
+      
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fedie",emi_sectors="trans")  ,dim=3)), "FE|Transport|Freight|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fedie",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|Freight|ESD|Liquids (EJ/yr)"),
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fedie",all_enty1="seliqbio",emi_sectors="trans")  ,dim=3)), "FE|Transport|Freight|Liquids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fedie",all_enty="seliqbio",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|Freight|ESD|Liquids|Biomass (EJ/yr)"),
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fedie",all_enty1="seliqfos",emi_sectors="trans")  ,dim=3)), "FE|Transport|Freight|Liquids|Fossil (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fedie",all_enty="seliqfos",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|Freight|ESD|Liquids|Fossil (EJ/yr)"),
+      
+      # transport electricity
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="feelt",emi_sectors="trans")  ,dim=3)), "FE|Transport|Electricity (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feelt",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|ESD|Electricity (EJ/yr)"),
+      
+      # transport hydrogen
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="feh2t",emi_sectors="trans")  ,dim=3)), "FE|Transport|Hydrogen (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feh2t",emi_sectors="trans", all_emiMkt="ES")  ,dim=3)), "FE|Transport|ESD|Hydrogen (EJ/yr)"),
+      
+      #Buildings
+      #setNames((dimSums(mselect(vm_demFeSector,emi_sectors="build")  ,dim=3)), "FE|Buildings (EJ/yr)"),
+      # Buildings liquids
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",emi_sectors="build")  ,dim=3)), "FE|Buildings|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Liquids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqbio",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Liquids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehos",all_enty="seliqfos",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Liquids|Fossil (EJ/yr)"),
+      
+      # Buildings Gases
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",emi_sectors="build")  ,dim=3)), "FE|Buildings|Gases (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|Gases|ESD (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqbio",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Gases|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fegas",all_enty="seliqfos",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Gases|Fossil (EJ/yr)"),
+      
+      # Buildings Solids
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",emi_sectors="build")  ,dim=3)), "FE|Buildings|Solids (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|Solids|ESD (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqbio",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Solids|Biomass (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fesos",all_enty="seliqfos",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Solids|Fossil (EJ/yr)"),
+      
+      # Buildings electricity
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="feels",emi_sectors="build")  ,dim=3)), "FE|Buildings|Electricity (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="feels",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Electricity (EJ/yr)"),
+      
+      # Buildings Heat
+      #setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehes",emi_sectors="build")  ,dim=3)), "FE|Buildings|Heat (EJ/yr)"),
+      setNames((dimSums(mselect(vm_demFeSector,all_enty1="fehes",emi_sectors="build", all_emiMkt="ES")  ,dim=3)), "FE|Buildings|ESD|Heat (EJ/yr)")
+    )
+    
+    tmp5 <- tmp6
+    
+  }
   
   #creating variables without bunkers
   if (tran_mod == "complex"){
