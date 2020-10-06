@@ -58,6 +58,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   yy <- c(seq(2005,2060,5),seq(2070,2110,10),2130,2150)
   
   d <- list(
+
     "Emissions|CO2 (Mt CO2/yr)"                                               = list("var"="o_emissions", "dim"=NA),
     "Emissions|CO2|Energy (Mt CO2/yr)"                                        = list("var"="o_emissions_energy", "dim"=NA),
     "Emissions|CO2|Energy|Demand (Mt CO2/yr)"                                 = list("var"="o_emissions_energy_demand", "dim"=NA),
@@ -83,6 +84,8 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     "Emissions|CO2|AFOLU (Mt CO2/yr)"                                         = list("var"="o_emissions_AFOLU","dim"=NA),
     "Emissions|CO2|DACCS sequestered (Mt CO2/yr)"                             = list("var"="o_emissions_DACCS","dim"=NA),
     "Emissions|CO2|Other (Mt CO2/yr)"                                         = list("var"="o_emissions_other","dim"=NA),
+
+    "Emissions|CO2|Bunkers (Mt CO2/yr)"                                       = list("var"="o_emissions_bunkers","dim"=NA),
 
     "Carbon Management|Carbon Capture (Mt CO2/yr)"                            = list("var"="o_capture","dim"=NA),
     "Carbon Management|Carbon Capture|Process|Energy (Mt CO2/yr)"             = list("var"="o_capture_energy","dim"=NA),
@@ -537,6 +540,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   ### CO2 ###
   tmp <- NULL
   tmp <- mbind(
+    x,
     ### please note: at the end of this file, regional CO2 emissions are reduced by bunker emission values emissions are reduced by bunker emission values
     setNames((vm_emiengregi[,,"co2"] + vm_sumeminegregi[,,"co2"] + vm_emicdrregi[,,"co2"]) * GtC_2_MtCO2,	"Emi|CO2 (Mt CO2/yr)"),
     setNames((vm_co2CCS[,,"cco2.ico2.ccsinje.1"]) * GtC_2_MtCO2,                               "Emi|CO2|Carbon Capture and Storage (Mt CO2/yr)"),
