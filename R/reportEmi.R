@@ -1304,6 +1304,18 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
       vm_co2capture)
   p_share_cco2_bio[is.na(p_share_cco2_bio)] <- 0
   
+  # share of captured carbon from pe2se technologies
+  p_share_cco2_pe2se <- collapseNames(dimSums(v_emi[,,][,,"cco2"], dim=3)/ 
+                                            vm_co2capture)
+  p_share_cco2_pe2se[is.na(p_share_cco2_bio)] <- 0
+  
+  #share of biogenic captured carbon from pe2se technologies
+  p_share_cco2_bio_pe2se <- collapseNames(dimSums(v_emi[,,pebio][,,"cco2"], dim=3)/ 
+                                            vm_co2capture)
+  p_share_cco2_bio_pe2se[is.na(p_share_cco2_bio)] <- 0
+  
+  
+  
   # share of captured carbon from DAC
   p_share_cco2_DAC <- replace_non_finite(v33_emiDAC / vm_co2capture)
   
@@ -1410,9 +1422,20 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     setNames(
       dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_ind_fos *
         GtC_2_MtCO2,
-      "Carbon Sequestration|CCU|Fossil Industry (Mt CO2/yr)")
-    
-  )
+      "Carbon Sequestration|CCU|Industry|Fossil (Mt CO2/yr)"),
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * (p_share_cco2_ind - p_share_cco2_ind_fos) *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Industry|Biomass (Mt CO2/yr)"),
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_bio_pe2se *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Pe2Se|Biomass (Mt CO2/yr)"),
+    setNames(
+      dimSums(vm_co2CCUshort,dim=3) * (p_share_cco2_pe2se - p_share_cco2_bio_pe2se) *
+        GtC_2_MtCO2,
+      "Carbon Sequestration|CCU|Pe2Se|Fossil (Mt CO2/yr)")
+)
   # cumulative CDR emissions
   tmp <- mbind(tmp, 
                setNames(cumulatedValue(tmp[,,"Emi|CO2|CDR|Land-Use Change (Mt CO2/yr)"]), "Emi|CO2|CDR|Land-Use Change|Cumulated (Mt CO2/yr)"),
@@ -2129,6 +2152,36 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     #    }
     #    out <- mbind(out,allowances)
     # }
+    
+    
+    ### FS: New CCS/CCU Reporting 
+    
+    ### read variables needed
+    vm_co2capture <- readGDX(gdx, "vm_co2capture", field = "l", restore_zeros = F) # captured CO2
+    vm_emiTeDetail <- readGDX(gdx, "vm_emiTeDetail", field="l", restore_zeros=F) # CO2/CCO2 emissions per technology
+    vm_ccs_cdr <- readGDX(gdx, "vm_ccs_cdr", field = "l", restore_zeros = F) # DAC capture
+    vm_emiIndCCS <- readGDX(gdx, "vm_emiIndCCS", field = "l", restore_zeros = F) # industry capture
+    
+    pm_emifac <- readGDX(gdx, "pm_emifac", field = "l", restore_zeros = F) # emission factor
+    vm_demFeSector <- readGDX(gdx, "vm_demFeSector", field = "l", restore_zeros = F) # FE demand per sector
+    
+    teccs    <- readGDX(gdx,c("teCCS","teccs"),format="first_found")
+    tebio    <- readGDX(gdx,c("teBio"),format="first_found")
+    # end read variables
+    
+    # BECC pe2se technologies
+    tebioCCS <- intersect(as.vector(teccs), as.vector(tebio))
+    
+    # share of biogenic captured CO2 in pe2se transformations
+    p_share_bio_cco2_pe2se <- collapseNames(
+                                dimSums(vm_emiTeDetail[,,"cco2"][,,tebioCCS], dim=3) /
+                                vm_co2capture)
+    
+    # share of biogenic caputred CO2 in industry capture
+    
+      
+    
+    
     
   return(out)
 }
