@@ -1060,6 +1060,20 @@ compareScenarios <- function(mif, hist,
                          ylab='Price|Final Energy|Liquids|Transport [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Liquids|Transport|HDV|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Liquids|Transport|HDV|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Liquids|Transport|HDV|w/ costs for emissions|ESD (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Liquids|Transport|HDV|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
   if("Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
     p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"],x_hist=NULL,
                            ylab='Price|Final Energy|Heating Oil|Buildings [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1069,6 +1083,13 @@ compareScenarios <- function(mif, hist,
     swfigure(sw,print,p,sw_option="height=9,width=8")
   }
 
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Heating Oil|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Heating Oil|Buildings|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Heating Oil|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Heating Oil|Buildings|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
   if("Price|Final Energy|Heating Oil|Industry (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
     p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Heating Oil|Industry (US$2005/GJ)"],x_hist=NULL,
                            ylab='Price|Final Energy|Heating Oil|Industry [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1078,6 +1099,13 @@ compareScenarios <- function(mif, hist,
     swfigure(sw,print,p,sw_option="height=9,width=8")
   }
 
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ESD (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Heating Oil|Industry|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
   ## ---- Prices FE Gas ----
 
   if("Price|Final Energy|Gases|Buildings (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
@@ -1089,6 +1117,13 @@ compareScenarios <- function(mif, hist,
     swfigure(sw,print,p,sw_option="height=9,width=8")
   }
 
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Gases|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Gases|Buildings|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Gases|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Gases|Buildings|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
   if("Price|Final Energy|Gases|Industry (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
     p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Gases|Industry (US$2005/GJ)"],x_hist=NULL,
                            ylab='Price|Final Energy|Gases|Industry [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1098,6 +1133,30 @@ compareScenarios <- function(mif, hist,
     swfigure(sw,print,p,sw_option="height=9,width=8")
   }
 
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
+  ## ---- Prices FE Hydrogen ----
+  
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Hydrogen|Buildings [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Hydrogen|Buildings [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
+  p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Hydrogen|Industry (US$2005/GJ)"],x_hist=NULL,
+                         ylab='Price|Final Energy|Hydrogen|Industry [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Price|Final Energy|Hydrogen|Industry (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
+                         ylab='Price|Final Energy|Hydrogen|Industry [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
+  
   ## ---- Prices FE Solids ----
 
   if("Price|Final Energy|Solids|Buildings (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
@@ -1301,30 +1360,54 @@ compareScenarios <- function(mif, hist,
 
   swlatex(sw,"\\subsection{GHGtot}")
 
+  targets = c("Emi|GHGtot|target|40% (Mt CO2-equiv/yr)"="-40% vs. 1990 (Eurostat)",
+                     "Emi|GHGtot|target|55% (Mt CO2-equiv/yr)"="-55% vs. 1990 (Eurostat)",
+                     "Emi|GHGtot|target|65% (Mt CO2-equiv/yr)"="-65% vs. 1990 (Eurostat)")
+
   p <- mipLineHistorical(data[mainReg,,"Emi|GHGtot (Mt CO2-equiv/yr)"],x_hist=hist[mainReg,,"Emi|GHGtot (Mt CO2-equiv/yr)"],
-                         ylab='Emi|GHGtot [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+                         ylab='Emi|GHGtot [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),
+                         hlines=if(all(names(targets) %in% getNames(hist, dim=3))) hist[mainReg,1990,names(targets)] else NULL, 
+                         hlines.labels=targets)
   swfigure(sw,print,p,sw_option="height=8,width=8")
+  
   p <- mipLineHistorical(data[,,"Emi|GHGtot (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"Emi|GHGtot (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],
-                         ylab='Emi|GHGtot [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+                         ylab='Emi|GHGtot [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3,
+                         hlines=if(all(names(targets) %in% getNames(hist, dim=3))) hist[,1990,names(targets)][mainReg,,invert=TRUE] else NULL)
   swfigure(sw,print,p,sw_option="height=9,width=8")
   
   if(mainReg=="EUR"){
     swlatex(sw,"\\subsection{GHG - Market}")
     
     swlatex(sw,"\\subsubsection{ETS}")
+
+    targets = c("Emi|GHG|ETS|target|40% (Mt CO2-equiv/yr)"="-40% vs. 2005 (EEA)",
+                       "Emi|GHG|ETS|target|55% (Mt CO2-equiv/yr)"="-55% vs. 2005 (EEA)",
+                       "Emi|GHG|ETS|target|65% (Mt CO2-equiv/yr)"="-65% vs. 2005 (EEA)")
+        
     p <- mipLineHistorical(data[mainReg,,"Emi|GHG|ETS (Mt CO2-equiv/yr)"],x_hist=hist[mainReg,,"Emi|GHG|ETS (Mt CO2-equiv/yr)"],
-                           ylab='Emi|GHG|ETS [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+                           ylab='Emi|GHG|ETS [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),
+                           hlines=if(all(names(targets) %in% getNames(hist, dim=3))) hist[mainReg,2005,names(targets)] else NULL,
+                           hlines.labels=targets)
     swfigure(sw,print,p,sw_option="height=8,width=8")  
     p <- mipLineHistorical(data[,,"Emi|GHG|ETS (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"Emi|GHG|ETS (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],
-                           ylab='Emi|GHG|ETS [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+                           ylab='Emi|GHG|ETS [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3,
+                           hlines=if(all(names(targets) %in% getNames(hist, dim=3))) hist[mainReg,,invert=TRUE][,2005,names(targets)] else NULL)
     swfigure(sw,print,p,sw_option="height=9,width=8")
     
     swlatex(sw,"\\subsubsection{ES}")
+    
+    targets = c("Emi|GHG|ES|target|40% (Mt CO2-equiv/yr)"="-40% vs. 2005 (EEA)",
+                       "Emi|GHG|ES|target|55% (Mt CO2-equiv/yr)"="-55% vs. 2005 (EEA)",
+                       "Emi|GHG|ES|target|65% (Mt CO2-equiv/yr)"="-65% vs. 2005 (EEA)")
+    
     p <- mipLineHistorical(data[mainReg,,"Emi|GHG|ES (Mt CO2-equiv/yr)"],x_hist=hist[mainReg,,"Emi|GHG|ES (Mt CO2-equiv/yr)"],
-                           ylab='Emi|GHG|ES [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+                           ylab='Emi|GHG|ES [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),
+                           hlines=if(all(names(targets) %in% getNames(hist, dim=3))) hist[mainReg,2005,names(targets)] else NULL,
+                           hlines.labels=targets)
     swfigure(sw,print,p,sw_option="height=8,width=8")  
     p <- mipLineHistorical(data[,,"Emi|GHG|ES (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"Emi|GHG|ES (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],
-                           ylab='Emi|GHG|ES [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+                           ylab='Emi|GHG|ES [Mt CO2-equiv/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3,
+                           hlines=if(all(names(targets) %in% getNames(hist, dim=3))) hist[mainReg,,invert=TRUE][,2005,names(targets)] else NULL)
     swfigure(sw,print,p,sw_option="height=9,width=8")
     
     swlatex(sw,"\\subsubsection{other}")
@@ -1716,6 +1799,18 @@ compareScenarios <- function(mif, hist,
                          ylab='Emi|N2O|Energy Supply and Demand [kt N2O/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
   
+  ## ---- Emissions F-Gases ----
+  swlatex(sw,"\\subsection{F-Gases}")
+
+  p <- mipLineHistorical(data[mainReg,,"Emi|F-Gases (Mt CO2-equiv/yr)"],
+                         ylab='Emi|F-Gases [Mt CO2-eq./yr]',
+                         scales="free_y")
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  p <- mipLineHistorical(data[,,"Emi|F-Gases (Mt CO2-equiv/yr)"][mainReg,,,invert=TRUE],
+                         ylab='Emi|F-Gases [Mt CO2-eq./yr]',
+                         scales="free_y",plot.priority=c("x_hist","x","x_proj"),
+                         facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
   
   if(mainReg=="EUR"){
     swlatex(sw,"\\subsection{N2O - Market}")
@@ -2059,7 +2154,8 @@ compareScenarios <- function(mif, hist,
              "SE|Liquids|Coal|w/ CCS (EJ/yr)",
              "SE|Liquids|Coal|w/o CCS (EJ/yr)",
              "SE|Liquids|Gas|w/ CCS (EJ/yr)",
-             "SE|Liquids|Gas|w/o CCS (EJ/yr)")
+             "SE|Liquids|Gas|w/o CCS (EJ/yr)",
+             "SE|Liquids|Hydrogen (EJ/yr)")										   
   var <- data[,,intersect(items,getNames(data,dim=3))]
 
   p <- mipArea(var[mainReg,,],scales="free_y")
@@ -2086,7 +2182,8 @@ compareScenarios <- function(mif, hist,
              "SE|Gases|Biomass|w/ CCS (EJ/yr)",
              "SE|Gases|Biomass|w/o CCS (EJ/yr)",
              "SE|Gases|Coal|w/ CCS (EJ/yr)",
-             "SE|Gases|Coal|w/o CCS (EJ/yr)")
+             "SE|Gases|Coal|w/o CCS (EJ/yr)",
+             "SE|Gases|Hydrogen (EJ/yr)")
   var <- data[,,intersect(items,getNames(data,dim=3))]
 
   p <- mipArea(var[mainReg,,],scales="free_y")
@@ -2533,248 +2630,278 @@ compareScenarios <- function(mif, hist,
   ## ---- ES passenger transport per capita (time domain, line graph)----
 
   swlatex(sw,"\\subsubsection{Energy Services for Passenger Transport (per Capita, year)}")
-
-  items<- c(
-    "ES|Transport|Pass (bn pkm/yr)",
-    "ES|Transport|Pass|LDV (bn pkm/yr)",
-    "ES|Transport|Pass|non-LDV (bn pkm/yr)")
-
-  p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
-                        global = T, per_gdp = F)
-
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
-                        global = F, per_gdp = F)
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-
+  
+  tryCatch(
+    expr = {
+      items<- c(
+        "ES|Transport|Pass (bn pkm/yr)",
+        "ES|Transport|Pass|Road|LDV (bn pkm/yr)",
+        "ES|Transport|Pass|non-LDV (bn pkm/yr)")
+      
+      p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
+                            global = T, per_gdp = F)
+      
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+      
+      p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
+                            global = F, per_gdp = F)
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+    },
+    error = function(e) {
+      swlatex(sw, paste('\\texttt{', e, '} \\newpage'))
+      NULL
+    }
+  )
+  
   ## ---- ES per capita for transport (GDP domain)----
-
+  
   swlatex(sw,"\\subsubsection{Energy Services for Transport (per Capita, GDP)}")
-
-  p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
-                        global = T, per_gdp = T)
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
-                        global = F, per_gdp = T)
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
+  
+  tryCatch(
+    expr = {
+      p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
+                            global = T, per_gdp = T)
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+      
+      p <- lineplots_perCap(data, items, 1e3, "Mobility Demand per Cap. (km/yr)",
+                            global = F, per_gdp = T)
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+    },
+    error = function(e) {
+      swlatex(sw, paste('\\texttt{', e, '} \\newpage'))
+      NULL
+    }
+  )
+  
 
   ## ---- ES freight transport per capita (time domain, line graph)----
-
+  
   swlatex(sw,"\\subsubsection{Energy Services for Freight Transport (per Capita, year)}")
-
-  items<- c(
-    "ES|Transport|Freight (bn tkm/yr)")
-
-  p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
-                        global = T, per_gdp = F)
-
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
-                        global = F, per_gdp = F)
-
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-
+  
+  tryCatch(
+    expr = {
+      items<- c(
+        "ES|Transport|Freight (bn tkm/yr)")
+      
+      p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
+                            global = T, per_gdp = F)
+      
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+      
+      p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
+                            global = F, per_gdp = F)
+      
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+    },
+    error = function(e) {
+      swlatex(sw, paste('\\texttt{', e, '} \\newpage'))
+      NULL
+    }
+  )
+  
+  
   ## ---- ES per capita for transport (GDP domain)----
-
+  
   swlatex(sw,"\\subsubsection{Energy Services for Freight Transport (per Capita, GDP)}")
-
-  p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
-                        global = T, per_gdp = T)
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
-                        global = F, per_gdp = T)
-
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
+  tryCatch(
+    expr = {
+      
+      p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
+                            global = T, per_gdp = T)
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+      
+      p <- lineplots_perCap(data, items, 1e3, "Freight Demand per Cap. (tkm/yr)",
+                            global = F, per_gdp = T)
+      
+      swfigure(sw,print,p,sw_option="height=9,width=16")
+      
+    },
+    error = function(e) {
+      swlatex(sw, paste('\\texttt{', e, '} \\newpage'))
+      NULL
+    }
+  )
   swlatex(sw,"\\twocolumn")
-
-  swlatex(sw,"\\subsubsection{Services}")
-  
-  p <- mipLineHistorical(data[mainReg,,"ES|Transport|Pass (bn pkm/yr)"],x_hist=hist[mainReg,,"ES|Transport|Pass (bn pkm/yr)"],
-                         ylab='ES|Transport|Pass [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"ES|Transport|Pass (bn pkm/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"ES|Transport|Pass (bn pkm/yr)"][mainReg,,,invert=TRUE],
-                         ylab='ES|Transport|Pass [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
-  p <- mipLineHistorical(data[mainReg,,"ES|Transport|Pass|LDV (bn pkm/yr)"],x_hist=hist[mainReg,,"ES|Transport|Pass|LDV (bn pkm/yr)"],
-                         ylab='ES|Transport|Pass|LDV [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"ES|Transport|Pass|LDV (bn pkm/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"ES|Transport|Pass|LDV (bn pkm/yr)"][mainReg,,,invert=TRUE],
-                         ylab='ES|Transport|Pass|LDV [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
-  p <- mipLineHistorical(data[mainReg,,"ES|Transport|Freight (bn tkm/yr)"],x_hist=hist[mainReg,,"ES|Transport|Freight (bn tkm/yr)"],
-                         ylab='ES|Transport|Freight [bn tkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"ES|Transport|Freight (bn tkm/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"ES|Transport|Freight (bn tkm/yr)"][mainReg,,,invert=TRUE],
-                         ylab='ES|Transport|Freight [bn tkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-
- ## ---- ++++ USEFUL ENERGY ++++ ----
-
-  swlatex(sw,"\\section{Useful Energy}")
-
-  swlatex(sw,"\\subsection{Transport}")
-
-
-  ## ---- UE transport per capita (time domain, line graph)----
-
-  swlatex(sw,"\\onecolumn")
-  swlatex(sw,"\\subsubsection{UE for Transport (per Capita, year)}")
-
-  items<- c(
-    "UE|Transport|LDV (EJ/yr)",
-    "UE|Transport|Pass|non-LDV (EJ/yr)",
-    "UE|Transport|Freight (EJ/yr)")
-
-  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = T)
-
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  ## Second page, with color coded regions
-
-  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = F)
-
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  swlatex(sw,"\\subsubsection{Useful Energy}")
-  
-  p <- mipLineHistorical(data[mainReg,,"UE|Transport (EJ/yr)"],x_hist=NULL,
-                         ylab='UE|Transport (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"UE|Transport (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='UE|Transport (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-
-  swlatex(sw,"\\subsubsection{UE for Transport (per Capita, GDP)}")
-  items<- c(
-    "UE|Transport|LDV (EJ/yr)",
-    "UE|Transport|Pass|non-LDV (EJ/yr)",
-    "UE|Transport|Freight (EJ/yr)")
-
-  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = T, per_gdp = T)
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = F, per_gdp = T)
-  swfigure(sw,print,p,sw_option="height=9,width=16")
-
-  
-  
-  # ---- Useful Energy - per energy ----
-  
-  swlatex(sw,"\\subsubsection{Useful Energy - per energy}")
-  
-  items <- c ("UE|Transport|Liquids (EJ/yr)",
-              "UE|Transport|Hydrogen (EJ/yr)",
-              "UE|Transport|Electricity (EJ/yr)")
-  var <- data[,,intersect(items,getNames(data,dim=3))]
-  
-  p <- mipArea(var[mainReg,,],scales="free_y")
-  p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=3.5,width=7")
-  
-  p <- mipBarYearData(var[mainReg,y_bar,])
-  p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=4.5,width=7")
-  
-  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE])
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
-  swlatex(sw,"\\onecolumn")
-  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y")
-  swfigure(sw,print,p,sw_option="height=8,width=16")
-  swlatex(sw,"\\twocolumn")
-  
-  
-  # ---- Useful Energy - per type ----
-  
-  swlatex(sw,"\\subsubsection{Useful Energy - per type}")
-  
-  
-  items <- c ("UE|Transport|LDV (EJ/yr)",
-              "UE|Transport|HDV (EJ/yr)",
-              "UE|Transport|Electric Trains (EJ/yr)")
-  var <- data[,,intersect(items,getNames(data,dim=3))]
-  
-  p <- mipArea(var[mainReg,,],scales="free_y")
-  p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=3.5,width=7")
-  
-  p <- mipBarYearData(var[mainReg,y_bar,])
-  p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=4.5,width=7")
-  
-  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE])
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
-  swlatex(sw,"\\onecolumn")
-  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y")
-  swfigure(sw,print,p,sw_option="height=8,width=16")
-  swlatex(sw,"\\twocolumn")
-  
-  # ---- Useful Energy - LDV - per type ----
- 
-  
-  swlatex(sw,"\\subsubsection{Useful Energy - LDV - per type}")
- 
-  
-  items <- c ("UE|Transport|LDV|Liquids (EJ/yr)",
-              "UE|Transport|LDV|Hydrogen (EJ/yr)",
-              "UE|Transport|LDV|Electricity (EJ/yr)")
-  var <- data[,,intersect(items,getNames(data,dim=3))]
-  
-  p <- mipArea(var[mainReg,,],scales="free_y")
-  p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=3.5,width=7")
-  
-  p <- mipBarYearData(var[mainReg,y_bar,])
-  p <- p + theme(legend.position="none")
-  swfigure(sw,print,p,sw_option="height=4.5,width=7")
-  
-  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE])
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
-  swlatex(sw,"\\onecolumn")
-  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y")
-  swfigure(sw,print,p,sw_option="height=8,width=16")
-  swlatex(sw,"\\twocolumn")
- 
-  
-  # ---- Useful Energy - extra ----
-  
-  p <- mipLineHistorical(data[mainReg,,"UE|Transport|Pass|non-LDV (EJ/yr)"],x_hist=NULL,
-                         ylab='UE|Transport|Pass|non-LDV (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"UE|Transport|Pass|non-LDV (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='UE|Transport|Pass|non-LDV (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
-  p <- mipLineHistorical(data[mainReg,,"UE|Transport|Freight (EJ/yr)"],x_hist=NULL,
-                         ylab='UE|Transport|Freight (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
-  swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"UE|Transport|Freight (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='UE|Transport|Freight (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-  
- 
+#  swlatex(sw,"\\subsubsection{Services}")
+#  
+#  p <- mipLineHistorical(data[mainReg,,"ES|Transport|Pass (bn pkm/yr)"],x_hist=hist[mainReg,,"ES|Transport|Pass (bn pkm/yr)"],
+#                         ylab='ES|Transport|Pass [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+#  swfigure(sw,print,p,sw_option="height=8,width=8")
+#  p <- mipLineHistorical(data[,,"ES|Transport|Pass (bn pkm/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"ES|Transport|Pass (bn pkm/yr)"][mainReg,,,invert=TRUE],
+#                         ylab='ES|Transport|Pass [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+#  p <- mipLineHistorical(data[mainReg,,"ES|Transport|Pass|LDV (bn pkm/yr)"],x_hist=hist[mainReg,,"ES|Transport|Pass|LDV (bn pkm/yr)"],
+#                         ylab='ES|Transport|Pass|LDV [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+#  swfigure(sw,print,p,sw_option="height=8,width=8")
+#  p <- mipLineHistorical(data[,,"ES|Transport|Pass|LDV (bn pkm/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"ES|Transport|Pass|LDV (bn pkm/yr)"][mainReg,,,invert=TRUE],
+#                         ylab='ES|Transport|Pass|LDV [bn pkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+#  p <- mipLineHistorical(data[mainReg,,"ES|Transport|Freight (bn tkm/yr)"],x_hist=hist[mainReg,,"ES|Transport|Freight (bn tkm/yr)"],
+#                         ylab='ES|Transport|Freight [bn tkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+#  swfigure(sw,print,p,sw_option="height=8,width=8")
+#  p <- mipLineHistorical(data[,,"ES|Transport|Freight (bn tkm/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"ES|Transport|Freight (bn tkm/yr)"][mainReg,,,invert=TRUE],
+#                         ylab='ES|Transport|Freight [bn tkm/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#
+# ## ---- ++++ USEFUL ENERGY ++++ ----
+#
+#  swlatex(sw,"\\section{Useful Energy}")
+#
+#  swlatex(sw,"\\subsection{Transport}")
+#
+#
+#  ## ---- UE transport per capita (time domain, line graph)----
+#
+#  swlatex(sw,"\\onecolumn")
+#  swlatex(sw,"\\subsubsection{UE for Transport (per Capita, year)}")
+#
+#  items<- c(
+#    "UE|Transport|LDV (EJ/yr)",
+#    "UE|Transport|Pass|non-LDV (EJ/yr)",
+#    "UE|Transport|Freight (EJ/yr)")
+#
+#  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = T)
+#
+#  swfigure(sw,print,p,sw_option="height=9,width=16")
+#
+#  ## Second page, with color coded regions
+#
+#  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = F)
+#
+#  swfigure(sw,print,p,sw_option="height=9,width=16")
+#
+#  swlatex(sw,"\\subsubsection{Useful Energy}")
+#  
+#  p <- mipLineHistorical(data[mainReg,,"UE|Transport (EJ/yr)"],x_hist=NULL,
+#                         ylab='UE|Transport (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+#  swfigure(sw,print,p,sw_option="height=8,width=8")
+#  p <- mipLineHistorical(data[,,"UE|Transport (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
+#                         ylab='UE|Transport (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#
+#  swlatex(sw,"\\subsubsection{UE for Transport (per Capita, GDP)}")
+#  items<- c(
+#    "UE|Transport|LDV (EJ/yr)",
+#    "UE|Transport|Pass|non-LDV (EJ/yr)",
+#    "UE|Transport|Freight (EJ/yr)")
+#
+#  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = T, per_gdp = T)
+#  swfigure(sw,print,p,sw_option="height=9,width=16")
+#
+#  p <- lineplots_perCap(data, items, 1e3, "UE per Cap. (GJ/yr)", global = F, per_gdp = T)
+#  swfigure(sw,print,p,sw_option="height=9,width=16")
+#
+#  
+#  
+#  # ---- Useful Energy - per energy ----
+#  
+#  swlatex(sw,"\\subsubsection{Useful Energy - per energy}")
+#  
+#  items <- c ("UE|Transport|Liquids (EJ/yr)",
+#              "UE|Transport|Hydrogen (EJ/yr)",
+#              "UE|Transport|Electricity (EJ/yr)")
+#  var <- data[,,intersect(items,getNames(data,dim=3))]
+#  
+#  p <- mipArea(var[mainReg,,],scales="free_y")
+#  p <- p + theme(legend.position="none")
+#  swfigure(sw,print,p,sw_option="height=3.5,width=7")
+#  
+#  p <- mipBarYearData(var[mainReg,y_bar,])
+#  p <- p + theme(legend.position="none")
+#  swfigure(sw,print,p,sw_option="height=4.5,width=7")
+#  
+#  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE])
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+#  swlatex(sw,"\\onecolumn")
+#  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y")
+#  swfigure(sw,print,p,sw_option="height=8,width=16")
+#  swlatex(sw,"\\twocolumn")
+#  
+#  
+#  # ---- Useful Energy - per type ----
+#  
+#  swlatex(sw,"\\subsubsection{Useful Energy - per type}")
+#  
+#
+#  items <- c ("UE|Transport|LDV (EJ/yr)",
+#              "UE|Transport|HDV (EJ/yr)",
+#              "UE|Transport|Electric Trains (EJ/yr)")
+#  var <- data[,,intersect(items,getNames(data,dim=3))]
+#  
+#  p <- mipArea(var[mainReg,,],scales="free_y")
+#  p <- p + theme(legend.position="none")
+#  swfigure(sw,print,p,sw_option="height=3.5,width=7")
+#  
+#  p <- mipBarYearData(var[mainReg,y_bar,])
+#  p <- p + theme(legend.position="none")
+#  swfigure(sw,print,p,sw_option="height=4.5,width=7")
+#  
+#  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE])
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+#  swlatex(sw,"\\onecolumn")
+#  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y")
+#  swfigure(sw,print,p,sw_option="height=8,width=16")
+#  swlatex(sw,"\\twocolumn")
+#  
+#  # ---- Useful Energy - LDV - per type ----
+# 
+#  
+#  swlatex(sw,"\\subsubsection{Useful Energy - LDV - per type}")
+# 
+#  
+#  items <- c ("UE|Transport|LDV|Liquids (EJ/yr)",
+#              "UE|Transport|LDV|Hydrogen (EJ/yr)",
+#              "UE|Transport|LDV|Electricity (EJ/yr)")
+#  var <- data[,,intersect(items,getNames(data,dim=3))]
+#  
+#  p <- mipArea(var[mainReg,,],scales="free_y")
+#  p <- p + theme(legend.position="none")
+#  swfigure(sw,print,p,sw_option="height=3.5,width=7")
+#  
+#  p <- mipBarYearData(var[mainReg,y_bar,])
+#  p <- p + theme(legend.position="none")
+#  swfigure(sw,print,p,sw_option="height=4.5,width=7")
+#  
+#  p <- mipBarYearData(var[,y_bar,][mainReg,,,invert=TRUE])
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+#  swlatex(sw,"\\onecolumn")
+#  p <- mipArea(var[mainReg,,,invert=TRUE],scales="free_y")
+#  swfigure(sw,print,p,sw_option="height=8,width=16")
+#  swlatex(sw,"\\twocolumn")
+# 
+#  
+#  # ---- Useful Energy - extra ----
+#  
+#  p <- mipLineHistorical(data[mainReg,,"UE|Transport|Pass|non-LDV (EJ/yr)"],x_hist=NULL,
+#                         ylab='UE|Transport|Pass|non-LDV (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+#  swfigure(sw,print,p,sw_option="height=8,width=8")
+#  p <- mipLineHistorical(data[,,"UE|Transport|Pass|non-LDV (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
+#                         ylab='UE|Transport|Pass|non-LDV (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+#  p <- mipLineHistorical(data[mainReg,,"UE|Transport|Freight (EJ/yr)"],x_hist=NULL,
+#                         ylab='UE|Transport|Freight (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+#  swfigure(sw,print,p,sw_option="height=8,width=8")
+#  p <- mipLineHistorical(data[,,"UE|Transport|Freight (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
+#                         ylab='UE|Transport|Freight (EJ/yr)',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+#  swfigure(sw,print,p,sw_option="height=9,width=8")
+#  
+# 
 
   ## ---- ++++ C L I M A T E ++++ ----
 
-  # swlatex(sw,"\\section{Climate}")
-  # 
-  # swfigure(sw,mipLineHistorical,data[,,"Forcing (W/m2)"],x_hist=NULL,
-  #          ylab='Forcing [W/m2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
-  # 
-  # swfigure(sw,mipLineHistorical,data[,,"Temperature|Global Mean (K)"],x_hist=NULL,
-  #          ylab='Temperature|Global Mean [K]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
+  swlatex(sw,"\\section{Climate}")
+
+  swfigure(sw,mipLineHistorical,data[,,"Forcing (W/m2)"],x_hist=NULL,
+           ylab='Forcing [W/m2]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
+
+  swfigure(sw,mipLineHistorical,data[,,"Temperature|Global Mean (K)"],x_hist=NULL,
+           ylab='Temperature|Global Mean [K]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),sw_option="height=10,width=9")
 
   ## Close output-pdf
   swclose(sw)
