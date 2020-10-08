@@ -1307,12 +1307,12 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   # share of captured carbon from pe2se technologies
   p_share_cco2_pe2se <- collapseNames(dimSums(v_emi[,,][,,"cco2"], dim=3)/ 
                                             vm_co2capture)
-  p_share_cco2_pe2se[is.na(p_share_cco2_bio)] <- 0
+  p_share_cco2_pe2se[is.na(p_share_cco2_pe2se)] <- 0
   
   #share of biogenic captured carbon from pe2se technologies
   p_share_cco2_bio_pe2se <- collapseNames(dimSums(v_emi[,,pebio][,,"cco2"], dim=3)/ 
                                             vm_co2capture)
-  p_share_cco2_bio_pe2se[is.na(p_share_cco2_bio)] <- 0
+  p_share_cco2_bio_pe2se[is.na(p_share_cco2_bio_pe2se)] <- 0
   
   
   
