@@ -390,7 +390,16 @@ reportEDGETransport <- function(output_folder=".",
 
 
   if(!is.null(regionSubsetList)){
-    toMIF <- toMIF[region %in% regionSubsetList]
+    if (is.list(regionSubsetList)) {
+      ## in a REMIND-EU run, the object regionSubsetList is a list, whereas in REMIND runs it is a dataframe. Hence the difference in wrangling
+      toMIF <- rbind(toMIF,do.call("rbind",lapply(names(regionSubsetList),
+                                                   function(x) {
+                                                     result <- toMIF[region %in% regionSubsetList[[x]]];
+                                                     return(result) })))    }
+    else {
+      toMIF <- toMIF[region %in% regionSubsetList]
+    }
+
   }
 
   ## Make sure there are no duplicates!
