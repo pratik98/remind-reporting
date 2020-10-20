@@ -385,17 +385,22 @@ reportEDGETransport <- function(output_folder=".",
     toMIF[grep("FE\\|Transport\\|(Pass|Freight)\\|Rail$", variable),
           .(variable="FE|Transport|Rail",
             unit="EJ/yr", value=sum(value)),
+          by=c("model", "scenario", "region", "period")],
+    toMIF[grep("FE\\|Transport\\|(Pass|Freight)\\|(Road|Rail|Aviation\\|Domestic|Road|Navigation)$", variable),
+          .(variable="FE|Transport w/o Bunkers",
+            unit="EJ/yr", value=sum(value)),
+          by=c("model", "scenario", "region", "period")],
+    toMIF[grep("FE\\|Transport\\|(Pass|Freight)\\|(Road|Rail|Aviation\\|Domestic|Road\\|LDV|Road\\|Bus|Navigation)\\|Liquids$", variable),
+          .(variable="FE|Transport|Liquids w/o Bunkers",
+            unit="EJ/yr", value=sum(value)),
           by=c("model", "scenario", "region", "period")]), use.names = TRUE)
-
-
-
   if(!is.null(regionSubsetList)){
     if (is.list(regionSubsetList)) {
       ## in a REMIND-EU run, the object regionSubsetList is a list, whereas in REMIND runs it is a dataframe. Hence the difference in wrangling
       toMIF <- rbind(toMIF,do.call("rbind",lapply(names(regionSubsetList),
-                                                   function(x) {
-                                                     result <- toMIF[region %in% regionSubsetList[[x]]];
-                                                     return(result) })))    }
+                                                  function(x) {
+                                                    result <- toMIF[region %in% regionSubsetList[[x]],][, .(value=sum(value)), by=c("model", "scenario", "period", "unit", "variable")][,region := x]; return(result) })))
+      }
     else {
       toMIF <- toMIF[region %in% regionSubsetList]
     }
