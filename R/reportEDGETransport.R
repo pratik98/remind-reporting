@@ -393,6 +393,10 @@ reportEDGETransport <- function(output_folder=".",
     toMIF[grep("FE\\|Transport\\|(Pass|Freight)\\|(Road|Rail|Aviation\\|Domestic|Road\\|LDV|Road\\|Bus|Navigation)\\|Liquids$", variable),
           .(variable="FE|Transport|Liquids w/o Bunkers",
             unit="EJ/yr", value=sum(value)),
+          by=c("model", "scenario", "region", "period")],
+    toMIF[grep("FE\\|Transport\\|Freight\\|(Road|Rail|Aviation\\|Domestic|Road|Navigation)$", variable),
+          .(variable="FE|Transport|Freight w/o Bunkers",
+            unit="EJ/yr", value=sum(value)),
           by=c("model", "scenario", "region", "period")]), use.names = TRUE)
   if(!is.null(regionSubsetList)){
     if (is.list(regionSubsetList)) {
