@@ -2488,6 +2488,15 @@ compareScenarios <- function(mif, hist,
     p <- mipLineHistorical(data[,,"FE|Buildings|Liquids (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=hist_edge[,,"FE|Buildings|Liquids (EJ/yr)"][mainReg,,,invert=TRUE],
                            ylab='FE|Buildings|Liquids [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
     swfigure(sw,print,p,sw_option="height=9,width=8")
+    
+    #p <- mipLineHistorical(data[mainReg,,"FE|Buildings|Hydrogen (EJ/yr)"],x_hist=hist_edge[mainReg,,"FE|Buildings|Hydrogen (EJ/yr)"],
+    p <- mipLineHistorical(data[mainReg,,"FE|Buildings|Hydrogen (EJ/yr)"],,
+                           ylab='FE|Buildings|Hydrogen [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+    swfigure(sw,print,p,sw_option="height=8,width=8")
+    #p <- mipLineHistorical(data[,,"FE|Buildings|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=hist_edge[,,"FE|Buildings|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],
+    p <- mipLineHistorical(data[,,"FE|Buildings|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],
+                           ylab='FE|Buildings|Hydrogen [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+    swfigure(sw,print,p,sw_option="height=9,width=8")
 
   }
 
@@ -2537,6 +2546,13 @@ compareScenarios <- function(mif, hist,
     p <- mipLineHistorical(data[,,"FE|Industry|Liquids (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=hist_edge[,,"FE|Industry|Liquids (EJ/yr)"][mainReg,,,invert=TRUE],
                            ylab='FE|Industry|Liquids [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
     swfigure(sw,print,p,sw_option="height=9,width=8")
+    
+    p <- mipLineHistorical(data[mainReg,,"FE|Industry|Hydrogen (EJ/yr)"],x_hist=hist_edge[mainReg,,"FE|Industry|Hydrogen (EJ/yr)"],
+                           ylab='FE|Industry|Hydrogen [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+    swfigure(sw,print,p,sw_option="height=8,width=8")
+    p <- mipLineHistorical(data[,,"FE|Industry|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=hist_edge[,,"FE|Industry|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],
+                           ylab='FE|Industry|Hydrogen [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+    swfigure(sw,print,p,sw_option="height=9,width=8")
 
   }
 
@@ -2579,6 +2595,15 @@ compareScenarios <- function(mif, hist,
                          ylab='FE|Transport|Electricity [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
 
+  #p <- mipLineHistorical(data[mainReg,,"FE|Transport|Hydrogen (EJ/yr)"],x_hist=hist[mainReg,,"FE|Transport|Hydrogen (EJ/yr)"],
+  p <- mipLineHistorical(data[mainReg,,"FE|Transport|Hydrogen (EJ/yr)"],
+                         ylab='FE|Transport|Hydrogen [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
+  swfigure(sw,print,p,sw_option="height=8,width=8")
+  #p <- mipLineHistorical(data[,,"FE|Transport|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"FE|Transport|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],
+  p <- mipLineHistorical(data[,,"FE|Transport|Hydrogen (EJ/yr)"][mainReg,,,invert=TRUE],
+                         ylab='FE|Transport|Hydrogen [EJ/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
+  swfigure(sw,print,p,sw_option="height=9,width=8")
+  
   var <- "FE|Transport|Gases (EJ/yr)"
 
   if (var %in% getNames(data,dim=3)) {
