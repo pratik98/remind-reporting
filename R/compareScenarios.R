@@ -126,6 +126,7 @@ compareScenarios <- function(mif, hist,
         facet_wrap(~ variable, scales="free_y") +
         ylab(ylabstr) +
         xlab("GDP PPP per Cap. (kUS$2005)") +
+        expand_limits(y=0) +
         theme_minimal()
 
     }else{
@@ -147,6 +148,7 @@ compareScenarios <- function(mif, hist,
         facet_wrap(~ variable, scales="free_y") +
         xlab("year") +
         ylab(ylabstr) +
+        expand_limits(y=0) +
         theme_minimal()
 
     }
