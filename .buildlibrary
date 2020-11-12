@@ -1,6 +1,7 @@
-ValidationKey: '6710758380'
+ValidationKey: '6718009158'
 AcceptedWarnings:
 - 'Warning: package ''.*'' was built under R version'
 - 'Warning: namespace ''.*'' is not available and has been replaced'
-AcceptedNotes: ~
+- ‘qpdf’ is needed for checks on size reduction of PDFs
+AcceptedNotes: Imports includes 29 non-default packages.
 AutocreateReadme: yes
