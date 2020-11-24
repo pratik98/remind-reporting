@@ -1109,9 +1109,7 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
         })
     )
     
-    tmp <- mbind(
-      tmp,
-      
+    tmp2 <- mbind(
       # fake some GLO data
       setNames(
         mbind(x, dimSums(x * NA, dim = 1)),
@@ -1119,8 +1117,15 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
       
       mbind(y, dimSums(y, dim = 1) * NA)
     )
+    
+    tmp <- mbind(
+      tmp,
+      mbind(
+        tmp2,
+        calc_regionSubset_sums(tmp2, regionSubsetList)
+      )
+    )
   }
-  
-  
+
   return(tmp)
 }
