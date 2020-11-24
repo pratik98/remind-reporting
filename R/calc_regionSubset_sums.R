@@ -16,6 +16,9 @@
 
 #' @export
 calc_regionSubset_sums <- function(data, regionSubsetList) {
+  if (is.null(data))
+    return(NULL)
+  
   mbind(
     lapply(
       names(regionSubsetList),
