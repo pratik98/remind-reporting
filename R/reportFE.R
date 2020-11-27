@@ -959,7 +959,10 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
     vm_prodSE <- readGDX(gdx,name=c("vm_prodSe","v_seprod"),field="l",restore_zeros=FALSE,format="first_found")
     
     p_share_synfuel_liq <- collapseNames(vm_prodSE[,,"seliqbio.MeOH"] / dimSums(mselect(vm_prodSE, all_enty1="seliqbio"), dim=3))
+    p_share_synfuel_liq[is.na(p_share_synfuel_liq)] <- 0
+    
     p_share_synfuel_gas <- vm_prodSE[,,"h22ch4"] / dimSums(mselect(vm_prodSE, all_enty1="segabio"), dim=3)
+    p_share_synfuel_gas[is.na(p_share_synfuel_gas)] <- 0
     
     tmp8 <- NULL
     tmp8 <- mbind(tmp8,
