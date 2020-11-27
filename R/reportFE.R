@@ -948,53 +948,65 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   ### FS: add new FE sectoral synfuel/biomass/fossil reporting
   #( taking into account that the proportion of seliqbio and seliqfos flows may be different across sectors)
   
+  ### disclaimer: (!) SE synfuels in REMIND-EU temporarily are part of seliqbio/segabio (which contains now biofuels and synfuels)
+  # This is different than in normal REMIND!!!
+  
   # calculate synfuel share in SE seliqbio
-  vm_prodSE <- readGDX(gdx,name=c("vm_prodSe","v_seprod"),field="l",restore_zeros=FALSE,format="first_found")
+  
+  # only if CCU is on
+  if ("MeOH" %in% getNames(prodSE, dim=3)) {
+    
+    vm_prodSE <- readGDX(gdx,name=c("vm_prodSe","v_seprod"),field="l",restore_zeros=FALSE,format="first_found")
+    
+    p_share_synfuel_liq <- collapseNames(vm_prodSE[,,"seliqbio.MeOH"] / dimSums(mselect(vm_prodSE, all_enty1="seliqbio"), dim=3))
+    p_share_synfuel_liq[is.na(p_share_synfuel_liq)] <- 0
+    
+    p_share_synfuel_gas <- vm_prodSE[,,"h22ch4"] / dimSums(mselect(vm_prodSE, all_enty1="segabio"), dim=3)
+    p_share_synfuel_gas[is.na(p_share_synfuel_gas)] <- 0
+    
+    tmp8 <- NULL
+    tmp8 <- mbind(tmp8,
+                  setNames(p_share_synfuel_liq * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.build"], dim=3)), 
+                           "FE|Buildings|Liquids|Synthetic|New Reporting (EJ/yr)"),
+                  setNames((1-p_share_synfuel_liq) * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.build"], dim=3)), 
+                           "FE|Buildings|Liquids|Biomass|New Reporting (EJ/yr)"),
+                  setNames(collapseNames(dimSums(vm_demFeSector[,,"seliqfos.fehos.build"], dim=3)),
+                           "FE|Buildings|Liquids|Fossil|New Reporting (EJ/yr)"),
+                  setNames(p_share_synfuel_liq * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.indst"], dim=3)), 
+                           "FE|Industry|Liquids|Synthetic|New Reporting (EJ/yr)"),
+                  setNames((1-p_share_synfuel_liq) * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.indst"], dim=3)), 
+                           "FE|Industry|Liquids|Biomass|New Reporting (EJ/yr)"),
+                  setNames(collapseNames(dimSums(vm_demFeSector[,,"seliqfos.fehos.indst"], dim=3)),
+                           "FE|Industry|Liquids|Fossil|New Reporting (EJ/yr)"),
+                  setNames(p_share_synfuel_liq * collapseNames(dimSums(vm_demFeSector[,,"seliqbio"][,,"trans"], dim=3)), 
+                           "FE|Transport|Liquids|Synthetic|New Reporting (EJ/yr)"),
+                  setNames((1-p_share_synfuel_liq) * collapseNames(dimSums(vm_demFeSector[,,"seliqbio"][,,"trans"], dim=3)), 
+                           "FE|Transport|Liquids|Biomass|New Reporting (EJ/yr)"),
+                  setNames(collapseNames(dimSums(vm_demFeSector[,,"seliqfos"][,,"trans"], dim=3)),
+                           "FE|Transport|Liquids|Fossil|New Reporting (EJ/yr)"),
+                  setNames(p_share_synfuel_gas * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fegas.build"], dim=3)), 
+                           "FE|Buildings|Gases|Synthetic|New Reporting (EJ/yr)"),
+                  setNames((1-p_share_synfuel_gas) * collapseNames(dimSums(vm_demFeSector[,,"segabio.fegas.build"], dim=3)), 
+                           "FE|Buildings|Gases|Biomass|New Reporting (EJ/yr)"),
+                  setNames(collapseNames(dimSums(vm_demFeSector[,,"segafos.fegas.build"], dim=3)),
+                           "FE|Buildings|Gases|Fossil|New Reporting (EJ/yr)"),
+                  setNames(p_share_synfuel_gas * collapseNames(dimSums(vm_demFeSector[,,"segabio.fegas.indst"], dim=3)), 
+                           "FE|Industry|Gases|Synthetic|New Reporting (EJ/yr)"),
+                  setNames((1-p_share_synfuel_gas) * collapseNames(dimSums(vm_demFeSector[,,"segabio.fegas.indst"], dim=3)), 
+                           "FE|Industry|Gases|Biomass|New Reporting (EJ/yr)"),
+                  setNames(collapseNames(dimSums(vm_demFeSector[,,"segafos.fegas.indst"], dim=3)),
+                           "FE|Industry|Gases|Fossil|New Reporting (EJ/yr)"),
+                  setNames(p_share_synfuel_gas * collapseNames(dimSums(vm_demFeSector[,,"segabio"][,,"trans"], dim=3)), 
+                           "FE|Transport|Gases|Synthetic|New Reporting (EJ/yr)"),
+                  setNames((1-p_share_synfuel_gas) * collapseNames(dimSums(vm_demFeSector[,,"segabio"][,,"trans"], dim=3)), 
+                           "FE|Transport|Gases|Biomass|New Reporting (EJ/yr)"),
+                  setNames(collapseNames(dimSums(vm_demFeSector[,,"segafos"][,,"trans"], dim=3)),
+                           "FE|Transport|Gases|Fossil|New Reporting (EJ/yr)"))
+    
+    
+    out <- mbind(out, tmp8)
+  }
 
-  p_share_synfuel_liq <- collapseNames(vm_prodSE[,,"seliqbio.MeOH"] / dimSums(mselect(vm_prodSE, all_enty1="seliqbio"), dim=3))
-  p_share_synfuel_gas <- vm_prodSE[,,"h22ch4"] / dimSums(mselect(vm_prodSE, all_enty1="segabio"), dim=3)
-  
-  tmp8 <- NULL
-  tmp8 <- mbind(tmp8,
-                setNames(p_share_synfuel_liq * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.build"], dim=3)), 
-                         "FE|Buildings|Liquids|Synthetic|New Reporting (EJ/yr)"),
-                setNames((1-p_share_synfuel_liq) * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.build"], dim=3)), 
-                         "FE|Buildings|Liquids|Biomass|New Reporting (EJ/yr)"),
-                setNames(collapseNames(dimSums(vm_demFeSector[,,"seliqfos.fehos.build"], dim=3)),
-                         "FE|Buildings|Liquids|Fossil|New Reporting (EJ/yr)"),
-                setNames(p_share_synfuel_liq * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.indst"], dim=3)), 
-                         "FE|Industry|Liquids|Synthetic|New Reporting (EJ/yr)"),
-                setNames((1-p_share_synfuel_liq) * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fehos.indst"], dim=3)), 
-                         "FE|Industry|Liquids|Biomass|New Reporting (EJ/yr)"),
-                setNames(collapseNames(dimSums(vm_demFeSector[,,"seliqfos.fehos.indst"], dim=3)),
-                         "FE|Industry|Liquids|Fossil|New Reporting (EJ/yr)"),
-                setNames(p_share_synfuel_liq * collapseNames(dimSums(vm_demFeSector[,,"seliqbio"][,,"trans"], dim=3)), 
-                         "FE|Transport|Liquids|Synthetic|New Reporting (EJ/yr)"),
-                setNames((1-p_share_synfuel_liq) * collapseNames(dimSums(vm_demFeSector[,,"seliqbio"][,,"trans"], dim=3)), 
-                         "FE|Transport|Liquids|Biomass|New Reporting (EJ/yr)"),
-                setNames(collapseNames(dimSums(vm_demFeSector[,,"seliqfos"][,,"trans"], dim=3)),
-                         "FE|Transport|Liquids|Fossil|New Reporting (EJ/yr)"),
-                setNames(p_share_synfuel_gas * collapseNames(dimSums(vm_demFeSector[,,"seliqbio.fegas.build"], dim=3)), 
-                         "FE|Buildings|Gases|Synthetic|New Reporting (EJ/yr)"),
-                setNames((1-p_share_synfuel_gas) * collapseNames(dimSums(vm_demFeSector[,,"segabio.fegas.build"], dim=3)), 
-                         "FE|Buildings|Gases|Biomass|New Reporting (EJ/yr)"),
-                setNames(collapseNames(dimSums(vm_demFeSector[,,"segafos.fegas.build"], dim=3)),
-                         "FE|Buildings|Gases|Fossil|New Reporting (EJ/yr)"),
-                setNames(p_share_synfuel_gas * collapseNames(dimSums(vm_demFeSector[,,"segabio.fegas.indst"], dim=3)), 
-                         "FE|Industry|Gases|Synthetic|New Reporting (EJ/yr)"),
-                setNames((1-p_share_synfuel_gas) * collapseNames(dimSums(vm_demFeSector[,,"segabio.fegas.indst"], dim=3)), 
-                         "FE|Industry|Gases|Biomass|New Reporting (EJ/yr)"),
-                setNames(collapseNames(dimSums(vm_demFeSector[,,"segafos.fegas.indst"], dim=3)),
-                         "FE|Industry|Gases|Fossil|New Reporting (EJ/yr)"),
-                setNames(p_share_synfuel_gas * collapseNames(dimSums(vm_demFeSector[,,"segabio"][,,"trans"], dim=3)), 
-                         "FE|Transport|Gases|Synthetic|New Reporting (EJ/yr)"),
-                setNames((1-p_share_synfuel_gas) * collapseNames(dimSums(vm_demFeSector[,,"segabio"][,,"trans"], dim=3)), 
-                         "FE|Transport|Gases|Biomass|New Reporting (EJ/yr)"),
-                setNames(collapseNames(dimSums(vm_demFeSector[,,"segafos"][,,"trans"], dim=3)),
-                         "FE|Transport|Gases|Fossil|New Reporting (EJ/yr)"))
-  
-  
-  out <- mbind(out, tmp8)
                  
   # add global values
   out <- mbind(out,dimSums(out,dim=1))
