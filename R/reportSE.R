@@ -328,8 +328,8 @@ reportSE <- function(gdx,regionSubsetList=NULL){
                setNames(collapseNames(vm_demSe[,,"seh2.seel.h2turb"]), "SE|Hydrogen|used for electricity|normal turbines (EJ/yr)"),
                setNames(collapseNames(vm_demSe[,,"seh2.seel.h2turbVRE"]), "SE|Hydrogen|used for electricity|forced VRE turbines (EJ/yr)"))
   
-  
-  if ("MeOH" %in% getNames(vm_demSe, dim=3)) {
+  # if CCU on
+  if (module2realisation[23,2] == "on") {
     tmp <- mbind(tmp,
                  setNames(collapseNames(vm_demSe[,,"seh2.seliqbio.MeOH"]), "SE|Hydrogen|used for synthetic fuels|liquids (EJ/yr)"),
                  setNames(collapseNames(vm_demSe[,,"seh2.segabio.h22ch4"]), "SE|Hydrogen|used for synthetic fuels|gases (EJ/yr)"))

@@ -954,7 +954,7 @@ reportFE <- function(gdx,regionSubsetList=NULL) {
   # calculate synfuel share in SE seliqbio
   
   # only if CCU is on
-  if ("MeOH" %in% getNames(prodSE, dim=3)) {
+  if (module2realisation[23,2] == "on") {
     
     vm_prodSE <- readGDX(gdx,name=c("vm_prodSe","v_seprod"),field="l",restore_zeros=FALSE,format="first_found")
     
