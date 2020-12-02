@@ -329,7 +329,7 @@ reportSE <- function(gdx,regionSubsetList=NULL){
                setNames(collapseNames(vm_demSe[,,"seh2.seel.h2turbVRE"]), "SE|Hydrogen|used for electricity|forced VRE turbines (EJ/yr)"))
   
   # if CCU on
-  if (module2realisation[23,2] == "on") {
+  if (realisation[23,2] == "on") {
     tmp <- mbind(tmp,
                  setNames(collapseNames(vm_demSe[,,"seh2.seliqbio.MeOH"]), "SE|Hydrogen|used for synthetic fuels|liquids (EJ/yr)"),
                  setNames(collapseNames(vm_demSe[,,"seh2.segabio.h22ch4"]), "SE|Hydrogen|used for synthetic fuels|gases (EJ/yr)"))
@@ -359,7 +359,7 @@ reportSE <- function(gdx,regionSubsetList=NULL){
                setNames(collapseNames(vm_demSe[,,"seel.seh2.elh2VRE"]),
                         "SE|Electricity|used for forced VRE electrolysis (EJ/yr)"))
   
-  if ("MeOH" %in% getNames(vm_demSe, dim=3)) {
+  if (realisation[23,2] == "on") {
     tmp <- mbind(tmp,
                  setNames(collapseNames(p_shareElec_H2 * vm_demSe[,,"seh2.seliqbio.MeOH"] / 
                                           collapseNames(pm_eta_conv[,,"elh2"])),
