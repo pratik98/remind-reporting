@@ -32,6 +32,8 @@ reportCapacity <- function(gdx,regionSubsetList=NULL) {
   vm_deltaCap <- readGDX(gdx,name=c("vm_deltaCap"),field="l",format="first_found") * 1000
   v_earlyreti <- readGDX(gdx,name=c("vm_capEarlyReti","v_capEarlyReti","v_earlyreti"),field="l",format="first_found")
   
+  module2realisation <- readGDX(gdx, "module2realisation", react = "silent")
+  
   # data preparation
   ttot <- as.numeric(as.vector(ttot))
   vm_cap      <- vm_cap[teall2rlf]
@@ -115,8 +117,8 @@ reportCapacity <- function(gdx,regionSubsetList=NULL) {
   tmp2 <- mbind(tmp2,setNames(dimSums(vm_deltaCap[,,"bioh2"],dim=3),               "New Cap|Hydrogen|Biomass|w/o CCS (GW)"))
   tmp2 <- mbind(tmp2,setNames(dimSums(vm_deltaCap[,,c("gash2c","coalh2c")],dim=3), "New Cap|Hydrogen|Fossil|w/ CCS (GW)"))
   tmp2 <- mbind(tmp2,setNames(dimSums(vm_deltaCap[,,c("gash2","coalh2")],dim=3),   "New Cap|Hydrogen|Fossil|w/o CCS (GW)"))
-  # Newly built capacities liquids
-  if ("MeOH" %in% getNames(vm_deltaCap, dim=1)) {
+  # Newly built capacities liquids, if CCU on
+  if (module2realisation[23,2] == "on") {
     tmp2 <- mbind(tmp2,setNames(dimSums(vm_deltaCap[,,c(refineries,"coalftrec","coalftcrec","bioftrec","bioftcrec","biodiesel","bioeths","bioethl","MeOH")],dim=3), 
                                 "New Cap|Liquids (GW)"))
     tmp2 <- mbind(tmp2, setNames(dimSums(vm_deltaCap[,,c(refineries,"coalftrec","coalftcrec")],dim=3), 
