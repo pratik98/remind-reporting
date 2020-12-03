@@ -278,10 +278,10 @@ reportTechnology <- function(gdx,output=NULL,regionSubsetList=NULL) {
     for(region in names(regionSubsetList)){
       tmp_RegAgg_ie2 <- do.call("mbind",lapply(names(int2ext), function(i2e) {
         map <- data.frame(region=regionSubsetList[[region]],parentRegion=region,stringsAsFactors=FALSE)
-        result <- speed_aggregate(tmp[regionSubsetList[[region]],,i2e],map,weight=output[regionSubsetList[[region]],,int2ext[i2e]])
+        result <- speed_aggregate(tmp[regionSubsetList[[region]],,i2e],map,weight=output[regionSubsetList[[region]],,int2ext[[i2e]]])
         getRegions(result) <- region
         for(t in getYears(tmp)){
-          if(all(output[regionSubsetList[[region]],t,int2ext[i2e]]==0)){
+          if(all(output[regionSubsetList[[region]],t,int2ext[[i2e]]]==0)){
             result[region,t,i2e] <- NA
           }
         }
