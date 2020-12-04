@@ -19,10 +19,11 @@
 #' @importFrom magclass getNames<- getYears collapseNames mbind getYears 
 #'   new.magpie getRegions setYears dimSums mselect replace_non_finite
 #' @importFrom dplyr inner_join select filter group_by summarise ungroup mutate
-#'             as_tibble rename
+#'             as_tibble rename %>%
 #' @importFrom tidyr complete nesting unite matches
 #' @importFrom quitte as.quitte character.data.frame
 #' @importFrom rlang .data
+#' @importFrom madrat toolAggregate
 
 reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   
@@ -798,6 +799,12 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                    setNames( collapseNames(EmiNonenSector[,,"ETS.indst"]*0),
                              "Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"))
     }
+    
+    # total GHG industry process emissions
+    tmp <- mbind(tmp,
+                 setNames(tmp[,,"Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"] +
+                          tmp[,,"Emi|GHG|Industry|Process|ETS (Mt CO2-equiv/yr)"],
+                          "Emi|GHG|Industry|Process (Mt CO2-equiv/yr)"))
 
     # total GHG industry emissions per market
     tmp <- mbind(tmp,
@@ -853,6 +860,59 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     )
   }
   
+  ### FS: total GHG energy and non-energy emissions
+  vm_emiTeMkt <- readGDX(gdx, "vm_emiTeMkt", field = "l", restore_zeros = F)
+  # array to include conversion to Mt and conversion to MtCO2eq by global warming potential
+  GWP <- new.magpie(names = getNames(vm_emiTeMkt, dim=1), fill = 0)
+  GWP[,,"co2"] <- 1 * GtC_2_MtCO2
+  GWP[,,"ch4"] <- 28
+  GWP[,,"n2o"] <- MtN2_to_ktN2O / 1000 * 265
+  
+  # total energy GHG emissions
+  EmiGHGEn <- dimSums(dimReduce(dimSums(vm_emiTeMkt, dim=3.2)) * GWP, dim=3)
+  
+  # total non-energy GHG emissions
+  
+  
+  # non-energy emissions
+  vm_emiMacSector <- readGDX(gdx, "vm_emiMacSector", field = "l", restore_zeros = F)
+  # mapping mac sector to emission market (EST/ETS)
+  macSector2emiMkt <- readGDX(gdx, "macSector2emiMkt")
+  # mapping mac sector to "reporting" sectors
+  emiMac2sector <- readGDX(gdx, "emiMac2sector")
+  
+  # Fugitive emissions
+  EmiGHGFug <- dimReduce(dimSums(vm_emiMacSector[,,c("ch4coal","ch4gas","ch4oil")], dim=3)*GWP[,,c("ch4")])
+  
+  # afolu (IPCC category 3 und 4), agriculture, forestry, land-use change
+  emi_sectors <- NULL
+  afolu.sec <- emiMac2sector %>% 
+                  filter(emi_sectors %in% c("Agriculture", "lulucf"))
+  
+  EmiGHGafolu <-  dimSums(toolAggregate(vm_emiMacSector[,,afolu.sec$all_enty], 
+                                        afolu.sec,from="all_enty", to="all_enty1", dim=3) * 
+                            GWP[,,c("co2","ch4","n2o")], dim=3)
+  
+  
+    
+  # total GHG emissions from MAC curves (incl. fugitive)
+  EmiNonEnGHG <- dimSums(toolAggregate(vm_emiMacSector[,,emiMac2sector$all_enty], 
+                               emiMac2sector,from="all_enty", to="all_enty1", dim=3) * 
+                           GWP[,,c("co2","ch4","n2o")], dim=3)
+  
+  ### GHG reporting total energy and non-energy emissions 
+  # (where energy emissions include fugitive emissions)
+  
+  tmp <- mbind(tmp, 
+               setNames( EmiGHGEn+EmiGHGFug, "Emi|GHG|Energy|incl. fugitive (Mt CO2-equiv/yr)"),
+               setNames( EmiNonEnGHG-EmiGHGFug, "Emi|GHG|Non-energy|excl. fugitive (Mt CO2-equiv/yr)" ),
+               setNames( EmiGHGafolu, "Emi|GHG|AFOLU (Mt CO2-equiv/yr)"))
+  
+  
+  
+  
+  
+
  
   # Emissions by PE and carrier, use function "emi_carrier" declared above ############################################################################
   tmp <- mbind(tmp,
