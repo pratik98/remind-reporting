@@ -508,6 +508,29 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
   )
   
   out <- mbind(tmp6, int_gr)
+  
+  ### add new variables needed for ARIADNE
+  tmp7 <- NULL
+  tmp7 <- mbind(tmp,
+                setNames(output[,,"Emissions|CO2|Energy (Mt CO2/yr)"] + output[,,"Emissions|CO2|Industrial Processes (Mt CO2/yr)"],
+                "Emissions|CO2|Energy and Industrial Processes (Mt CO2/yr)"))
+  
+  out <- mbind(out, tmp7)
+  
+  if (tran_mod == "edge_esm") {
+    tmp8 <- NULL
+    tmp8 <- mbind(tmp8, 
+                  setNames(output[,,"Emi|CO2|Transport|Freight|Short-Medium Distance|Demand (Mt CO2/yr)"] +
+                           output[,,"Emi|CO2|Transport|Freight|Long Distance|Demand (Mt CO2/yr)"],
+                           "Emi|CO2|Transport|Freight|Demand (Mt CO2/yr)"),
+                  setNames(output[,,"Emi|CO2|Transport|Pass|Short-Medium Distance|Demand (Mt CO2/yr)"] +
+                             output[,,"Emi|CO2|Transport|Pass|Long Distance|Demand (Mt CO2/yr)"],
+                           "Emi|CO2|Transport|Pass|Demand (Mt CO2/yr)"))
+    
+    out <- mbind(out, tmp8)
+  }
+
+
   return(out)
 }
 
