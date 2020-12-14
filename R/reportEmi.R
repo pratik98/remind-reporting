@@ -977,6 +977,17 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Solids,"co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|SupplyandDemand|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)")
   )
   
+  ### aggregate (net) supply emissions
+  tmp <- mbind(tmp,
+               setNames(tmp[,,"Emi|CO2|Energy|Supply|Electricity|w/ couple prod (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Hydrogen|w/ couple prod (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"],
+                          "Emi|CO2|Energy|Supply (Mt CO2/yr)"))
+  
+  
   tmp <- mbind(tmp,
                setNames(p_share_carbonCapture_stor * tmp[,,"Emi|CO2|Carbon Capture|Biomass|Supply|Electricity|w/ couple prod (Mt CO2/yr)"],
                         "Emi|CO2|Carbon Capture and Storage|Biomass|Supply|Electricity|w/ couple prod (Mt CO2/yr)"), 
