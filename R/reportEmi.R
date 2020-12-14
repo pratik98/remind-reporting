@@ -33,6 +33,10 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
        output <- output[c("GLO",names(regionSubsetList)),,invert = T]
   }
   
+  
+  ####### read in needed data #########
+  module2realisation <- readGDX(gdx, "module2realisation")
+  
   #### alternative emissions accounting
   # Emissions|CO2                       # Emissions|CO2 (Mt CO2/yr)
   #   |Energy                           ## Emissions|CO2|Energy (Mt CO2/yr)
@@ -93,7 +97,8 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     "Carbon Management|Carbon Capture|Energy|Electricity (Mt CO2/yr)" = list("var"="o_capture_energy_elec","dim"=NA),
     "Carbon Management|Carbon Capture|Energy|Other (Mt CO2/yr)"       = list("var"="o_capture_energy_other","dim"=NA),
     "Carbon Management|Carbon Capture|Direct Air Capture (Mt CO2/yr)" = list("var"="o_capture_cdr","dim"=NA),
-    "Carbon Management|Carbon Capture|Industrial Processes (Mt CO2/yr)"=list("var"="o_capture_industry","dim"=NA),
+    # not only process industry, but total industry (energy + process), needs to be corrected in core/postsolve.gms as well
+    "Carbon Management|Carbon Capture|Industry (Mt CO2/yr)"=list("var"="o_capture_industry","dim"=NA),
     "Carbon Management|Carbon Capture|Primary Energy|Biomass (Mt CO2/yr)"     = list("var"="o_capture_energy_bio","dim"=NA),
     "Carbon Management|Carbon Capture|Primary Energy|Fossil (Mt CO2/yr)"      = list("var"="o_capture_energy_fos", "dim"=NA),
     "Carbon Management|CCU (Mt CO2/yr)"                                       = list("var"="o_carbon_CCU","dim"=NA),
@@ -143,6 +148,18 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                      )
   )
   
+  ### calculate CCS share of captured Carbon for new Emissions|CO2 reporting
+  # if CCU is on
+  if (module2realisation[23,2] == "on") {
+    x <- mbind(x,
+               setNames(x[,,"Carbon Management|Underground Storage (Mt CO2/yr)"] / 
+                          x[,,"Carbon Management|Carbon Capture (Mt CO2/yr)"]*100, "Carbon Management|CCS Share of Captured Carbon (%)"))
+    x[is.na(x[,,"Carbon Management|CCS Share of Captured Carbon (%)"])] <- 1 # put 1 if no Co2 capture
+    
+  }
+
+
+  
   ####### conversion factors ##########
   s_GWP_CH4 <- readGDX(gdx,c("sm_gwpCH4","s_gwpCH4","s_GWP_CH4"),format="first_found", react = "silent")
   s_GWP_N2O <- readGDX(gdx,c("s_gwpN2O","s_GWP_N2O"),format="first_found")
@@ -150,9 +167,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   TWa_2_EJ <- 31.536
   GtC_2_MtCO2 <- 44 / 12 * 1000
   MtN2_to_ktN2O <- 44 / 28 * 1000
-  
-  ####### read in needed data #########
-  module2realisation <- readGDX(gdx, "module2realisation")
+
   
   ppfen_stat  <- readGDX(gdx, c("ppfen_stationary_dyn38",
                                 "ppfen_stationary_dyn28",
@@ -619,6 +634,32 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
              + (dimSums(mselect(v_emi,all_enty=pebio,all_enty2="cco2"),dim=3)) * GtC_2_MtCO2,    "Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"),
     setNames((vm_eminegregi[,,"co2luc"] ) * GtC_2_MtCO2,                                         "Emi|CO2|Land-Use Change (Mt CO2/yr)")
   )
+  
+  ### add pe2se fossil and biomass Capture and storage
+  x <- mbind(x,
+              setNames(
+                dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3) 
+                * dimSums(p_share_carbonCapture_stor)
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture and Storage|Pe2Se|Biomass (Mt CO2/yr)"
+              ),
+              setNames(
+                dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3) 
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture|Pe2Se|Biomass (Mt CO2/yr)"
+              ),
+              setNames(
+                dimSums(mselect(v_emi, all_enty = peFos, all_enty2 = "cco2"), dim = 3) 
+                * dimSums(p_share_carbonCapture_stor)
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture and Storage|Pe2Se|Fossil (Mt CO2/yr)"
+              ),
+              setNames(
+                dimSums(mselect(v_emi, all_enty = peFos, all_enty2 = "cco2"), dim = 3) 
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture|Pe2Se|Fossil (Mt CO2/yr)"
+              ))
+  
   if(!is.null(vm_emiAllMkt)) {
     
     vm_demFeSector <- readGDX(gdx,name=c("vm_demFeSector"),field="l",format="first_found",restore_zeros=FALSE)

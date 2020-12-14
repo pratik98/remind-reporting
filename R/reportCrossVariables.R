@@ -515,6 +515,26 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
                 setNames(output[,,"Emissions|CO2|Energy (Mt CO2/yr)"] + output[,,"Emissions|CO2|Industrial Processes (Mt CO2/yr)"],
                 "Emissions|CO2|Energy and Industrial Processes (Mt CO2/yr)"))
   
+  # calculate total captured bio and fossil carbon from existing variables (pe2se capture + industry capture)
+  # if CCU is on
+  if (module2realisation[23,2] == "on") {
+    tmp7 <- mbind(tmp,
+                  setNames(output[,,"Carbon Management|Carbon Capture|Primary Energy|Biomass (Mt CO2/yr)"] + 
+                             output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"] / 
+                             output[,,"Carbon Management|CCS Share of Captured Carbon (%)"],
+                           "Carbon Management|Carbon Capture|Biomass (Mt CO2/yr)"),
+                  # fossil captured CO2 = pe2se captured fossil co2 + industry captured CO2 - industry biomass captured co2
+                  setNames(output[,,"Carbon Management|Carbon Capture|Primary Energy|Fossil (Mt CO2/yr)"] +
+                             output[,,"Carbon Management|Carbon Capture|Industry (Mt CO2/yr)"] -
+                             output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"] / 
+                             output[,,"Carbon Management|CCS Share of Captured Carbon (%)"],
+                           "Carbon Management|Carbon Capture|Fossil (Mt CO2/yr)")
+    )
+  }
+  
+  
+  
+  
   out <- mbind(out, tmp7)
   
   if (tran_mod == "edge_esm") {
