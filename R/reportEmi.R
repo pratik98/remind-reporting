@@ -944,9 +944,9 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   ### GHG reporting total energy and non-energy emissions 
   # (where energy emissions include fugitive emissions)
   
-  tmp <- mbind(tmp, 
-               setNames( EmiGHGEn+EmiGHGFug, "Emi|GHG|Energy|incl. fugitive (Mt CO2-equiv/yr)"),
-               setNames( EmiNonEnGHG-EmiGHGFug, "Emi|GHG|Non-energy|excl. fugitive (Mt CO2-equiv/yr)" ),
+  tmp2 <- mbind(tmp, 
+               setNames( EmiGHGEn+EmiGHGFug, "Emi|GHG|Energy|incl fugitive (Mt CO2-equiv/yr)"),
+               setNames( EmiNonEnGHG-EmiGHGFug, "Emi|GHG|Non-energy|excl fugitive (Mt CO2-equiv/yr)" ),
                setNames( EmiGHGafolu, "Emi|GHG|AFOLU (Mt CO2-equiv/yr)"))
   
   
