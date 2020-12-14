@@ -546,6 +546,11 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
                   setNames(output[,,"Emi|CO2|Transport|Pass|Short-Medium Distance|Demand (Mt CO2/yr)"] +
                              output[,,"Emi|CO2|Transport|Pass|Long Distance|Demand (Mt CO2/yr)"],
                            "Emi|CO2|Transport|Pass|Demand (Mt CO2/yr)"))
+    # # FE bunkers
+    # tmp8 <- mbind(tmp8,
+    #               setNames(output[,,"FE|Transport|Freight|International Shipping (EJ/yr)"]
+    #                        + output[,,"FE|Transport|Pass|Aviation|International (EJ/yr)"],
+    #                        "FE|Transport|Bunkers (EJ/yr)"))
     
     out <- mbind(out, tmp8)
   }
