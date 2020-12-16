@@ -19,10 +19,11 @@
 #' @importFrom magclass getNames<- getYears collapseNames mbind getYears 
 #'   new.magpie getRegions setYears dimSums mselect replace_non_finite
 #' @importFrom dplyr inner_join select filter group_by summarise ungroup mutate
-#'             as_tibble rename
+#'             as_tibble rename %>%
 #' @importFrom tidyr complete nesting unite matches
 #' @importFrom quitte as.quitte character.data.frame
 #' @importFrom rlang .data
+#' @importFrom madrat toolAggregate
 
 reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   
@@ -31,6 +32,10 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   } else {
        output <- output[c("GLO",names(regionSubsetList)),,invert = T]
   }
+  
+  
+  ####### read in needed data #########
+  module2realisation <- readGDX(gdx, "module2realisation")
   
   #### alternative emissions accounting
   # Emissions|CO2                       # Emissions|CO2 (Mt CO2/yr)
@@ -92,7 +97,8 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     "Carbon Management|Carbon Capture|Energy|Electricity (Mt CO2/yr)" = list("var"="o_capture_energy_elec","dim"=NA),
     "Carbon Management|Carbon Capture|Energy|Other (Mt CO2/yr)"       = list("var"="o_capture_energy_other","dim"=NA),
     "Carbon Management|Carbon Capture|Direct Air Capture (Mt CO2/yr)" = list("var"="o_capture_cdr","dim"=NA),
-    "Carbon Management|Carbon Capture|Industrial Processes (Mt CO2/yr)"=list("var"="o_capture_industry","dim"=NA),
+    # not only process industry, but total industry (energy + process), needs to be corrected in core/postsolve.gms as well
+    "Carbon Management|Carbon Capture|Industry (Mt CO2/yr)"=list("var"="o_capture_industry","dim"=NA),
     "Carbon Management|Carbon Capture|Primary Energy|Biomass (Mt CO2/yr)"     = list("var"="o_capture_energy_bio","dim"=NA),
     "Carbon Management|Carbon Capture|Primary Energy|Fossil (Mt CO2/yr)"      = list("var"="o_capture_energy_fos", "dim"=NA),
     "Carbon Management|CCU (Mt CO2/yr)"                                       = list("var"="o_carbon_CCU","dim"=NA),
@@ -142,6 +148,18 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                      )
   )
   
+  ### calculate CCS share of captured Carbon for new Emissions|CO2 reporting
+  # if CCU is on
+  if (module2realisation[23,2] == "on") {
+    x <- mbind(x,
+               setNames(x[,,"Carbon Management|Underground Storage (Mt CO2/yr)"] / 
+                          x[,,"Carbon Management|Carbon Capture (Mt CO2/yr)"]*100, "Carbon Management|CCS Share of Captured Carbon (%)"))
+    x[is.na(x[,,"Carbon Management|CCS Share of Captured Carbon (%)"])] <- 1 # put 1 if no Co2 capture
+    
+  }
+
+
+  
   ####### conversion factors ##########
   s_GWP_CH4 <- readGDX(gdx,c("sm_gwpCH4","s_gwpCH4","s_GWP_CH4"),format="first_found", react = "silent")
   s_GWP_N2O <- readGDX(gdx,c("s_gwpN2O","s_GWP_N2O"),format="first_found")
@@ -149,9 +167,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   TWa_2_EJ <- 31.536
   GtC_2_MtCO2 <- 44 / 12 * 1000
   MtN2_to_ktN2O <- 44 / 28 * 1000
-  
-  ####### read in needed data #########
-  module2realisation <- readGDX(gdx, "module2realisation")
+
   
   ppfen_stat  <- readGDX(gdx, c("ppfen_stationary_dyn38",
                                 "ppfen_stationary_dyn28",
@@ -618,6 +634,32 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
              + (dimSums(mselect(v_emi,all_enty=pebio,all_enty2="cco2"),dim=3)) * GtC_2_MtCO2,    "Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"),
     setNames((vm_eminegregi[,,"co2luc"] ) * GtC_2_MtCO2,                                         "Emi|CO2|Land-Use Change (Mt CO2/yr)")
   )
+  
+  ### add pe2se fossil and biomass Capture and storage
+  x <- mbind(x,
+              setNames(
+                dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3) 
+                * dimSums(p_share_carbonCapture_stor)
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture and Storage|Pe2Se|Biomass (Mt CO2/yr)"
+              ),
+              setNames(
+                dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3) 
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture|Pe2Se|Biomass (Mt CO2/yr)"
+              ),
+              setNames(
+                dimSums(mselect(v_emi, all_enty = peFos, all_enty2 = "cco2"), dim = 3) 
+                * dimSums(p_share_carbonCapture_stor)
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture and Storage|Pe2Se|Fossil (Mt CO2/yr)"
+              ),
+              setNames(
+                dimSums(mselect(v_emi, all_enty = peFos, all_enty2 = "cco2"), dim = 3) 
+                * GtC_2_MtCO2,
+                "Emi|CO2|Carbon Capture|Pe2Se|Fossil (Mt CO2/yr)"
+              ))
+  
   if(!is.null(vm_emiAllMkt)) {
     
     vm_demFeSector <- readGDX(gdx,name=c("vm_demFeSector"),field="l",format="first_found",restore_zeros=FALSE)
@@ -798,6 +840,12 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                    setNames( collapseNames(EmiNonenSector[,,"ETS.indst"]*0),
                              "Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"))
     }
+    
+    # total GHG industry process emissions
+    tmp <- mbind(tmp,
+                 setNames(tmp[,,"Emi|GHG|Industry|Process|ESD (Mt CO2-equiv/yr)"] +
+                          tmp[,,"Emi|GHG|Industry|Process|ETS (Mt CO2-equiv/yr)"],
+                          "Emi|GHG|Industry|Process (Mt CO2-equiv/yr)"))
 
     # total GHG industry emissions per market
     tmp <- mbind(tmp,
@@ -853,6 +901,59 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     )
   }
   
+  ### FS: total GHG energy and non-energy emissions
+  vm_emiTeMkt <- readGDX(gdx, "vm_emiTeMkt", field = "l", restore_zeros = F)
+  # array to include conversion to Mt and conversion to MtCO2eq by global warming potential
+  GWP <- new.magpie(names = getNames(vm_emiTeMkt, dim=1), fill = 0)
+  GWP[,,"co2"] <- 1 * GtC_2_MtCO2
+  GWP[,,"ch4"] <- 28
+  GWP[,,"n2o"] <- MtN2_to_ktN2O / 1000 * 265
+  
+  # total energy GHG emissions
+  EmiGHGEn <- dimSums(dimReduce(dimSums(vm_emiTeMkt, dim=3.2)) * GWP, dim=3)
+  
+  # total non-energy GHG emissions
+  
+  
+  # non-energy emissions
+  vm_emiMacSector <- readGDX(gdx, "vm_emiMacSector", field = "l", restore_zeros = F)
+  # mapping mac sector to emission market (EST/ETS)
+  macSector2emiMkt <- readGDX(gdx, "macSector2emiMkt")
+  # mapping mac sector to "reporting" sectors
+  emiMac2sector <- readGDX(gdx, "emiMac2sector")
+  
+  # Fugitive emissions
+  EmiGHGFug <- dimReduce(dimSums(vm_emiMacSector[,,c("ch4coal","ch4gas","ch4oil")], dim=3)*GWP[,,c("ch4")])
+  
+  # afolu (IPCC category 3 und 4), agriculture, forestry, land-use change
+  emi_sectors <- NULL
+  afolu.sec <- emiMac2sector %>% 
+                  filter(emi_sectors %in% c("Agriculture", "lulucf"))
+  
+  EmiGHGafolu <-  dimSums(toolAggregate(vm_emiMacSector[,,afolu.sec$all_enty], 
+                                        afolu.sec,from="all_enty", to="all_enty1", dim=3) * 
+                            GWP[,,c("co2","ch4","n2o")], dim=3)
+  
+  
+    
+  # total GHG emissions from MAC curves (incl. fugitive)
+  EmiNonEnGHG <- dimSums(toolAggregate(vm_emiMacSector[,,emiMac2sector$all_enty], 
+                               emiMac2sector,from="all_enty", to="all_enty1", dim=3) * 
+                           GWP[,,c("co2","ch4","n2o")], dim=3)
+  
+  ### GHG reporting total energy and non-energy emissions 
+  # (where energy emissions include fugitive emissions)
+  
+  tmp2 <- mbind(tmp, 
+               setNames( EmiGHGEn+EmiGHGFug, "Emi|GHG|Energy|incl fugitive (Mt CO2-equiv/yr)"),
+               setNames( EmiNonEnGHG-EmiGHGFug, "Emi|GHG|Non-energy|excl fugitive (Mt CO2-equiv/yr)" ),
+               setNames( EmiGHGafolu, "Emi|GHG|AFOLU (Mt CO2-equiv/yr)"))
+  
+  
+  
+  
+  
+
  
   # Emissions by PE and carrier, use function "emi_carrier" declared above ############################################################################
   tmp <- mbind(tmp,
@@ -875,6 +976,17 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Gas,"co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|SupplyandDemand|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"),
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Solids,"co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|SupplyandDemand|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)")
   )
+  
+  ### aggregate (net) supply emissions
+  tmp <- mbind(tmp,
+               setNames(tmp[,,"Emi|CO2|Energy|Supply|Electricity|w/ couple prod (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Hydrogen|w/ couple prod (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+                        tmp[,,"Emi|CO2|Energy|Supply|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"],
+                          "Emi|CO2|Energy|Supply (Mt CO2/yr)"))
+  
   
   tmp <- mbind(tmp,
                setNames(p_share_carbonCapture_stor * tmp[,,"Emi|CO2|Carbon Capture|Biomass|Supply|Electricity|w/ couple prod (Mt CO2/yr)"],
