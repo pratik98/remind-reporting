@@ -1,8 +1,8 @@
 Package: remind
 Type: Package
 Title: The REMIND R package
-Version: 36.165.3
-Date: 2020-12-03
+Version: 36.165.4
+Date: 2020-12-15
 Author@R: Anastasis Giannousakis, Michaja Pehl
 Author: Anastasis Giannousakis <giannou@pik-potsdam.de>
 Maintainer: Anastasis Giannousakis <giannou@pik-potsdam.de>
