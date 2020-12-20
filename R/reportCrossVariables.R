@@ -509,34 +509,33 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
   
   out <- mbind(tmp6, int_gr)
   
-  ### add new variables needed for ARIADNE
+  
+  ### add energy demand-side and energy emissions CO2 aggregation
+
+  # total demand-side emissions (Emissions|CO2 does not include industry CCS)
   tmp7 <- NULL
   tmp7 <- mbind(tmp7,
-                setNames(output[,,"Emissions|CO2|Energy (Mt CO2/yr)"] + output[,,"Emissions|CO2|Industrial Processes (Mt CO2/yr)"],
-                "Emissions|CO2|Energy and Industrial Processes (Mt CO2/yr)"))
+               setNames(out[,,"Emi|CO2|Industry|Direct (Mt CO2/yr)"] +
+                        out[,,"Emi|CO2|Buildings|Direct (Mt CO2/yr)"] +
+                        output[,,"Emi|CO2|Transport|Demand (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Demand (Mt CO2/yr)"))
   
-  # calculate total captured bio and fossil carbon from existing variables (pe2se capture + industry capture)
-  # if CCU is on
-  if (module2realisation[23,2] == "on") {
-    tmp7 <- mbind(tmp7,
-                  setNames(output[,,"Carbon Management|Carbon Capture|Primary Energy|Biomass (Mt CO2/yr)"] + 
-                             output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"] / 
-                             output[,,"Carbon Management|CCS Share of Captured Carbon (%)"],
-                           "Carbon Management|Carbon Capture|Biomass (Mt CO2/yr)"),
-                  # fossil captured CO2 = pe2se captured fossil co2 + industry captured CO2 - industry biomass captured co2
-                  setNames(output[,,"Carbon Management|Carbon Capture|Primary Energy|Fossil (Mt CO2/yr)"] +
-                             output[,,"Carbon Management|Carbon Capture|Industry (Mt CO2/yr)"] -
-                             output[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Energy|Demand|Industry (Mt CO2/yr)"] / 
-                             output[,,"Carbon Management|CCS Share of Captured Carbon (%)"],
-                           "Carbon Management|Carbon Capture|Fossil (Mt CO2/yr)")
-    )
-  }
-  
-  
+  tmp7 <- mbind(tmp7, 
+               setNames(tmp7[,,"Emi|CO2|Energy|Demand (Mt CO2/yr)"]+
+                        output[,,"Emi|CO2|Energy|Supply (Mt CO2/yr)"],
+                        "Emi|CO2|Energy|Supply+Demand (Mt CO2/yr)"))
+  tmp7 <- mbind(tmp7, 
+               setNames(output[,,"Emi|CO2|Energy (Mt CO2/yr)"]+
+                        output[,,"Emi|CO2|Fossil Fuels and Industry|Cement process (Mt CO2/yr)"],
+                        "Emi|CO2|Energy and Industrial Processes (Mt CO2/yr)"))
   
   
   out <- mbind(out, tmp7)
   
+  
+  ### additional EDGE-T variables for ariadne
+  # also: are bunkers included in EDGE-T emissions reporting? 
+  # Because the below does not add up to Emi|CO2|Demand|Transport from reportEmi.
   if (tran_mod == "edge_esm") {
     tmp8 <- NULL
     tmp8 <- mbind(tmp8, 
@@ -546,6 +545,9 @@ reportCrossVariables <- function(gdx,output=NULL,regionSubsetList=NULL){
                   setNames(output[,,"Emi|CO2|Transport|Pass|Short-Medium Distance|Demand (Mt CO2/yr)"] +
                              output[,,"Emi|CO2|Transport|Pass|Long Distance|Demand (Mt CO2/yr)"],
                            "Emi|CO2|Transport|Pass|Demand (Mt CO2/yr)"))
+    
+
+    
     # # FE bunkers
     # tmp8 <- mbind(tmp8,
     #               setNames(output[,,"FE|Transport|Freight|International Shipping (EJ/yr)"]
