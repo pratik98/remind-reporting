@@ -783,13 +783,12 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     # Industry ETS energy GHG emissions:
     # all se2fe ESM industry emissions of ETS - industry energy CCS 
     tmp <- mbind(tmp,
-                 # industry energy ETS emissions: ESM industry emissions - industry energy CCS
+                 # industry energy ETS emissions: ESM industry emissions - industry energy CCS (to fix: assume for the moment that all CCS is going to ETS as done in REMIND)
                  setNames( collapseNames(EmiEnSector[,,"ETS.indst"]) -
                                  GtC_2_MtCO2 * dimSums(vm_emiIndCCS[,, c("co2cement","co2chemicals","co2steel","co2otherInd")], dim=3), 
                                "Emi|GHG|Industry|Energy|ETS (Mt CO2-equiv/yr)"),
-                 # industry process ETS emissions: non-energy ETS emissions - industry process CCS
-                 setNames( collapseNames(EmiNonenSector[,,"ETS.indst"]) - 
-                             GtC_2_MtCO2 * vm_emiIndCCS[,,"co2cement_process"],
+                 # industry process ETS emissions: non-energy ETS emissions (process CCS already included)
+                 setNames( collapseNames(EmiNonenSector[,,"ETS.indst"]),
                                 "Emi|GHG|Industry|Process|ETS (Mt CO2-equiv/yr)"),
                  # industry energy ESD emissions: ESM ESD industry emissions
                  setNames( collapseNames(EmiEnSector[,,"ES.indst"]), "Emi|GHG|Industry|Energy|ESD (Mt CO2-equiv/yr)")
@@ -913,7 +912,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   ### GHG reporting total energy and non-energy emissions 
   # (where energy emissions include fugitive emissions)
   
-  tmp2 <- mbind(tmp, 
+  tmp <- mbind(tmp, 
                setNames( EmiGHGEn+EmiGHGFug, "Emi|GHG|Energy|incl fugitive (Mt CO2-equiv/yr)"),
                setNames( EmiNonEnGHG-EmiGHGFug, "Emi|GHG|Non-energy|excl fugitive (Mt CO2-equiv/yr)" ),
                setNames( EmiGHGafolu, "Emi|GHG|AFOLU (Mt CO2-equiv/yr)"))
