@@ -196,6 +196,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   emi2te     <- readGDX(gdx,"emi2te")
   cintbyfuel <- readGDX(gdx,c("emi2fuelMine","cintbyfuel"),format="first_found")
   pe2se      <- readGDX(gdx,"pe2se")
+  se2se      <- readGDX(gdx, "se2se")
   se2fe      <- readGDX(gdx,"se2fe")
   fe2ue      <- readGDX(gdx, c("fe2ue", "fe2es"),format="first_found")
   fety       <- readGDX(gdx,c("entyFe","fety"),format="first_found")
@@ -288,7 +289,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   vm_sumeminegregi  <- readGDX(gdx,name=c("vm_emiMac","vm_sumeminegregi"),field="l",format="first_found")
   vm_fuelex      <- readGDX(gdx, name = c("vm_fuExtr","vm_fuelex", "vm_fuelextmp"), field="l",format = "first_found")
   vm_prodSE      <- readGDX(gdx,name=c("vm_prodSe","v_seprod"),field="l",restore_zeros=FALSE,format="first_found") * pm_conv_TWa_EJ
-  vm_prodSE      <- vm_prodSE[pe2se]
+  vm_prodSE      <- vm_prodSE[rbind(pe2se,se2se)]
   vm_prodFe      <- readGDX(gdx,name=c("vm_prodFe","v_feprod","vm_feprod"),field="l",restore_zeros=FALSE,format="first_found") * pm_conv_TWa_EJ
   vm_prodFe      <- vm_prodFe[se2fe]
   vm_demFe       <- readGDX(gdx,name=c("v_demFe","vm_demFe"),field="l",restore_zeros=FALSE,format="first_found") * pm_conv_TWa_EJ
@@ -944,6 +945,31 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Gas,"co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|SupplyandDemand|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"),
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Solids,"co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|SupplyandDemand|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)")
   )
+  
+  ### in case of synfuel production -> add CO2 flows into synfuels to liquids and gases supply emissions
+  if (module2realisation["CCU",2] == "on") {
+    p39_co2_dem <- readGDX(gdx, "p39_co2_dem",restore_zeros = F)
+    p39_co2_dem <- dimReduce(p39_co2_dem[,"y2030",]) # only take one year for now
+
+    # calculate CO2 needed for synfuel production
+    tmp <- mbind(tmp,
+                  setNames(p39_co2_dem[,,"MeOH"] * vm_prodSE[,,"MeOH"],
+                  "Carbon Management|CCU|Liquids (Mt CO2/yr)"),
+                  setNames(p39_co2_dem[,,"h22ch4"] * vm_prodSE[,,"h22ch4"],
+                  "Carbon Management|CCU|Gases (Mt CO2/yr)"))
+    
+    
+    ## add to respective supply emissions
+    tmp[,,"Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] <- 
+      tmp[,,"Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+      tmp[,,"Carbon Management|CCU|Liquids (Mt CO2/yr)"]
+    
+    tmp[,,"Emi|CO2|Energy|Supply|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] <- 
+      tmp[,,"Emi|CO2|Energy|Supply|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"] +
+      tmp[,,"Carbon Management|CCU|Gases (Mt CO2/yr)"]
+            
+  }
+  
   
   ### aggregate (net) supply emissions
   tmp <- mbind(tmp,
@@ -1608,13 +1634,10 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     setNames(tmp[,,"Emi|CO2|Fossil Fuels and Industry|Demand|After IndustryCCS (Mt CO2/yr)"],  "Emi|CO2|Fossil Fuels and Industry|Demand (Mt CO2/yr)")
     )    
   
-  tmp <- mbind(tmp,
-               setNames(tmp[,,"Emi|CO2|Fossil Fuels and Industry|Energy Supply (Mt CO2/yr)"] + tmp[,,"Emi|CO2|Fossil Fuels and Industry|Demand (Mt CO2/yr)"] ,
-                        "Emi|CO2|Energy (Mt CO2/yr)"))
-  
+
   
   tmp <- mbind(tmp,
-               setNames(tmp[,,"Emi|CO2|Fossil Fuels and Industry|Energy Supply (Mt CO2/yr)"] +
+               setNames(tmp[,,"Emi|CO2|Energy|Supply (Mt CO2/yr)"] +
                     tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|w/ couple prod (Mt CO2/yr)"] -
                     tmp[,,"Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)"],
                    "Emi|CO2|Energy|Supply|Non-Elec|Gross (Mt CO2/yr)")
@@ -1623,7 +1646,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   tmp <- mbind(
     tmp,
     setNames(
-        tmp[,,"Emi|CO2|Fossil Fuels and Industry|Energy Supply (Mt CO2/yr)"] 
+        tmp[,,"Emi|CO2|Energy|Supply (Mt CO2/yr)"] 
       - tmp[,,"Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"],
       "Emi|CO2|Energy|Supply|Non-Elec (Mt CO2/yr)")
     )
@@ -1633,7 +1656,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                setNames(-1 * tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass (Mt CO2/yr)"], 
                         "Emi|CO2|Carbon Capture and Storage|Biomass|Neg (Mt CO2/yr)") )
   tmp <- mbind(tmp,
-               setNames(tmp[,,"Emi|CO2|Fossil Fuels and Industry|Energy Supply (Mt CO2/yr)"] +
+               setNames(tmp[,,"Emi|CO2|Energy|Supply (Mt CO2/yr)"] +
                           tmp[,,"Emi|CO2|Carbon Capture and Storage|Biomass|Supply|w/ couple prod (Mt CO2/yr)"],
                         "Emi|CO2|Energy|Supply|Gross (Mt CO2/yr)"))
   
