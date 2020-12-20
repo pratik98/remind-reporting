@@ -1664,6 +1664,15 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                setNames(cumulatedValue(tmp[,,"Emi|CO2|Energy|Supply|Electricity|Gross (Mt CO2/yr)"]), "Emi|CO2|Energy|Supply|Electricity|Gross|Cumulated (Mt CO2/yr)")
   )
   
+  # total energy CO2 emissions (directly from REMIND), this includes industry CCS and CCU!
+  vm_emiTeMkt <- readGDX(gdx, c("vm_emiTeMkt","vm_emiTe"), field = "l", 
+                         restore_zeros = F, format = "first_found")
+  
+  tmp <- mbind(tmp,
+                setNames(dimSums(vm_emiTeMkt[,,"co2"]*GtC_2_MtCO2,dim=3),
+                "Emi|CO2|Energy (Mt CO2/yr)"))
+  
+  
   
   
   ### If Buildings Industry Structure ############################################################################
