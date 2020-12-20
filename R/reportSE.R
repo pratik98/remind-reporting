@@ -176,7 +176,7 @@ reportSE <- function(gdx,regionSubsetList=NULL){
   }
 
   tmp1 <- mbind(tmp1,
-    se.prod(prodSe,dataoc,oc2te,sety,pety,sety,              name = "SE (EJ/yr)"),
+    se.prod(prodSe,dataoc,oc2te,sety,c(pety,sety),sety,                  name = "SE (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,pebio,sety,                         name = "SE|Biomass (EJ/yr)"),
     se.prod(prodSe,dataoc,oc2te,sety,append(pety, "seh2"),"seel",        name = "SE|Electricity (EJ/yr)"),  # seh2 to account for se2se prodution once we add h2 to elec technology
     se.prod(prodSe, dataoc, oc2te, sety, pety, 'seel', te = techp,       name = "SE|Electricity|CHP|w/o CCS (EJ/yr)"),
