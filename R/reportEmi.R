@@ -2212,6 +2212,10 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   if (!is.null(regionSubsetList))
     out <- mbind(out, calc_regionSubset_sums(out, regionSubsetList))
   
+  
+  ### Bunker Correction Part
+  
+
   # correction of variables containing bunker fuel emissions:
   all_regs <- getRegions(out)
   
@@ -2224,6 +2228,8 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     setNames(  out[,,"Emi|CO2|Fossil Fuels and Industry|Demand|Before IndustryCCS (Mt CO2/yr)"],    "Emi|CO2|Fossil Fuels and Industry|Demand|Before IndustryCCS|w/ Bunkers (Mt CO2/yr)"),
     setNames(  out[,,"Emi|Kyoto Gases (Mt CO2-equiv/yr)"],    "Emi|Kyoto Gases|w/ Bunkers (Mt CO2/yr)"),
     setNames(  out[,,"Emi|GHGtot (Mt CO2-equiv/yr)"],    "Emi|GHGtot|w/ Bunkers (Mt CO2-equiv/yr)"),
+    setNames(  out[,,"Emi|CO2|Energy (Mt CO2/yr)"],    "Emi|CO2|Energy|w/ Bunkers (Mt CO2/yr)"),
+    setNames(  out[,,"Emi|GHG|Energy|incl fugitive (Mt CO2-equiv/yr)"],    "Emi|GHG|Energy|incl fugitive|w/ Bunkers (Mt CO2-equiv/yr)"),
     setNames(  out[,,"Emi|CO2|Transport (Mt CO2/yr)"],    "Emi|CO2|Transport|w/ Bunkers (Mt CO2/yr)"),
     setNames(  out[,,"Emi|CO2|Transport|Demand (Mt CO2/yr)"],    "Emi|CO2|Transport|Demand|w/ Bunkers (Mt CO2/yr)"),
     setNames(  out[,,"Emi|CO2|Transport|w/o couple prod (Mt CO2/yr)"],    "Emi|CO2|Transport|w/o couple prod|w/ Bunkers (Mt CO2/yr)"),
@@ -2234,10 +2240,15 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
   )
   
 
+  ### Aggregate to global values
+  
   # for all regions (excluding the world region "GLO")...
   regs <- all_regs[all_regs!= "GLO"]
+  
+
+  
   # ...and all variables that include bunker fuels...
-    vars_with_bunkers <- c("Emi|CO2 (Mt CO2/yr)",
+  vars_with_bunkers <- c("Emi|CO2 (Mt CO2/yr)",
                          "Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)",
                          "Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)",
                          "Emi|CO2|Fossil Fuels and Industry|Demand|Before IndustryCCS (Mt CO2/yr)",
@@ -2245,6 +2256,8 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                          "Emi|CO2|Fossil Fuels and Industry|Demand|After IndustryCCS (Mt CO2/yr)",
                          "Emi|Kyoto Gases (Mt CO2-equiv/yr)",
                          "Emi|GHGtot (Mt CO2-equiv/yr)",
+                         "Emi|CO2|Energy (Mt CO2/yr)",
+                         "Emi|GHG|Energy|incl fugitive (Mt CO2-equiv/yr)",
                          "Emi|CO2|Transport (Mt CO2/yr)",
                          "Emi|CO2|Transport|Demand (Mt CO2/yr)",
                          "Emi|CO2|Transport|w/o couple prod (Mt CO2/yr)"
