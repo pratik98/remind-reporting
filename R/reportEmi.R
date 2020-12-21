@@ -932,6 +932,9 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     emi_carrier(v_emi,dataoc,oc2te,sety,pebio,se_Gas,"cco2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Carbon Capture|Biomass|Supply|Gases|w/ couple prod (Mt CO2/yr)"),
     emi_carrier(v_emi,dataoc,oc2te,sety,pebio,se_Solids,"cco2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Carbon Capture|Biomass|Supply|Solids|w/ couple prod (Mt CO2/yr)"),
     
+    
+    # note: energy emissions from fuel extraction for oil, gas and coal would still need to be added here! 
+    # (see energy emissions defined in REMIND in q_emiTeMkt)
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,"seel","co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|Supply|Electricity|w/ couple prod (Mt CO2/yr)"),
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,"sehe","co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"),
     emi_carrier(v_emi,dataoc,oc2te,sety,pety,"seh2","co2",GtC_2_MtCO2,te=pe2se$all_te,  name="Emi|CO2|Energy|Supply|Hydrogen|w/ couple prod (Mt CO2/yr)"),
@@ -1187,6 +1190,14 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
       "Emi|CO2|Carbon Capture and Storage|IndustryCCS (Mt CO2/yr)")
   )
   
+  
+  ### seperate only industry energy CCS
+  tmp2 <- mbind(tmp2,
+                setNames(tmp2[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|fegas (Mt CO2/yr)"]+
+                         tmp2[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|fesos (Mt CO2/yr)"]+
+                         tmp2[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|fehos (Mt CO2/yr)"],
+                         "Emi|CO2|Carbon Capture and Storage|IndustryCCS|Energy (Mt CO2/yr)"))
+  
   # adjust all industry CCS variables for CCU/CCS split
   # rename the above variables to -> "Carbon Capture"
   # calculate new "Carbon Capture and Storage" variables based on the CCS share of captured CO2
@@ -1286,7 +1297,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
               + 1 * tmp[,,"Emi|CO2|Energy|SupplyandDemand|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"]
               + 1 * tmp[,,"Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"]
               + vm_eminegregi[,,"co2cement_process"]
-              - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS (Mt CO2/yr)"]
+              - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|Energy (Mt CO2/yr)"]
     ),                     "Emi|CO2|Other Sector|Direct and Indirect|w/ couple prod (Mt CO2/yr)"), # sectoral emissions including couple production
     setNames( dimSums( (p_ef_dem[,,FE_Stat_fety]*(1-p_bioshare[,,FE_Stat_fety]))
                        * dimSums(mselect(vm_prodFe,all_enty1=FE_Stat_fety),dim=c(3.1,3.3))
@@ -1691,7 +1702,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
         )
         * dimSums(mselect(vm_prodFe, all_enty1 = FE_Stat_fety), dim = c(3.1, 3.3)),
         dim = 3)
-        - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS (Mt CO2/yr)"],
+        - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|Energy (Mt CO2/yr)"],
         "Emi|CO2|Industry|Direct|BeforeTradBiomassCorr (Mt CO2/yr)")
     }
     
@@ -1707,7 +1718,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
           * dimSums(mselect(vm_prodFe, all_enty1 = FE_Stat_fety), 
                     dim = c(3.1, 3.3)), 
           dim = 3)
-        - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS (Mt CO2/yr)"]
+        - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|Energy (Mt CO2/yr)"]
         ), 
         "Emi|CO2|Industry|Direct|BeforeTradBiomassCorr (Mt CO2/yr)")
     )
@@ -1771,7 +1782,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                  + collapseNames(p_share_fegas_i * tmp[,,"Emi|CO2|Energy|SupplyandDemand|Gases|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"])
                  + collapseNames(p_share_fesos_i * tmp[,,"Emi|CO2|Energy|SupplyandDemand|Solids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)"])
                  + collapseNames(p_share_fehes_i * tmp[,,"Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"])
-                 - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS (Mt CO2/yr)"]   ## all industry CCS happens in industry
+                 - tmp[,,"Emi|CO2|Carbon Capture and Storage|IndustryCCS|Energy (Mt CO2/yr)"]   ## all industry CCS happens in industry
       ),       "Emi|CO2|Industry|Direct and Indirect|BeforeTradBiomassCorr (Mt CO2/yr)"),
       
       setNames(( collapseNames(p_share_feels_i * p_share_seel_s  * tmp[,,"Emi|CO2|Energy|Supply|Electricity|Gross|w/ couple prod (Mt CO2/yr)"])
