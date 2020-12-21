@@ -972,8 +972,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
             
   }
   
-  test <- emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Liq,"co2",GtC_2_MtCO2,te=pe2se$all_te,    name="Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)")
-  ### aggregate (net) supply emissions
+ 
   tmp <- mbind(tmp,
                setNames(tmp[,,"Emi|CO2|Energy|Supply|Electricity|w/ couple prod (Mt CO2/yr)"] +
                         tmp[,,"Emi|CO2|Energy|Supply|Heat|w/ couple prod (Mt CO2/yr)"] +
