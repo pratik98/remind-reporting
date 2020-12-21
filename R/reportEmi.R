@@ -955,9 +955,9 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
 
     # calculate CO2 needed for synfuel production
     tmp <- mbind(tmp,
-                  setNames(p39_co2_dem[,,"MeOH"] * vm_prodSE[,,"MeOH"],
+                  setNames(p39_co2_dem[,,"MeOH"] * vm_prodSE[,,"MeOH"] * GtC_2_MtCO2 / pm_conv_TWa_EJ,
                   "Carbon Management|CCU|Liquids (Mt CO2/yr)"),
-                  setNames(p39_co2_dem[,,"h22ch4"] * vm_prodSE[,,"h22ch4"],
+                  setNames(p39_co2_dem[,,"h22ch4"] * vm_prodSE[,,"h22ch4"] * GtC_2_MtCO2 / pm_conv_TWa_EJ,
                   "Carbon Management|CCU|Gases (Mt CO2/yr)"))
     
     
@@ -972,7 +972,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
             
   }
   
-  
+  test <- emi_carrier(v_emi,dataoc,oc2te,sety,pety,se_Liq,"co2",GtC_2_MtCO2,te=pe2se$all_te,    name="Emi|CO2|Energy|Supply|Liquids|w/ couple prod|Before IndustryCCS (Mt CO2/yr)")
   ### aggregate (net) supply emissions
   tmp <- mbind(tmp,
                setNames(tmp[,,"Emi|CO2|Energy|Supply|Electricity|w/ couple prod (Mt CO2/yr)"] +
@@ -1428,7 +1428,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
                setNames(
                  dimSums(mselect(v_emi, all_enty = pebio, all_enty2 = "cco2"), dim = 3) 
                  * GtC_2_MtCO2,
-                 "Emi|CO2|Carbon Capture|Pe2Se|Biomass (Mt CO2/yr)"
+                   "Emi|CO2|Carbon Capture|Pe2Se|Biomass (Mt CO2/yr)"
                ),
                setNames(
                  dimSums(mselect(v_emi, all_enty = peFos, all_enty2 = "cco2"), dim = 3) 
@@ -1586,7 +1586,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     
     setNames(
       dimSums(vm_co2CCUshort,dim=3) * GtC_2_MtCO2,
-      "Carbon Sequestration|CCU (Mt CO2/yr)"),
+        "Carbon Sequestration|CCU (Mt CO2/yr)"),
     
     setNames(
       dimSums(vm_co2CCUshort,dim=3) * p_share_cco2_bio * GtC_2_MtCO2,
