@@ -2,5 +2,3 @@
 ^\.Rproj\.user$
 ^\.git$
 ^\.buildlibrary$
-^\.github$
-^codecov\.yml$
