@@ -28,30 +28,45 @@ convGDX2MIF <- function(gdx,gdx_ref=NULL,file=NULL,scenario="default",t=c(seq(20
     
   # make the reporting
   output <- NULL
+  cat("running reportMacroEconomy...\n")
   output <- mbind(output,reportMacroEconomy(gdx,regionSubsetList)[,t,])
+  cat("running reportTrade...\n")
   output <- mbind(output,reportTrade(gdx,regionSubsetList)[,t,])
+  cat("running reportTax...\n")
   output <- mbind(output,reportTax(gdx,regionSubsetList)[,t,])
-    
+  cat("running reportPE...\n")    
   output <- mbind(output,reportPE(gdx,regionSubsetList)[,t,])
+  cat("running reportSE...\n")
   output <- mbind(output,reportSE(gdx,regionSubsetList)[,t,])
+  cat("running reportFE...\n")
   output <- mbind(output,reportFE(gdx,regionSubsetList)[,t,])
+  cat("running reportExtraction...\n")
   output <- mbind(output,reportExtraction(gdx,regionSubsetList)[,t,])
+  cat("running reportCapacity...\n")
   output <- mbind(output,reportCapacity(gdx,regionSubsetList)[,t,])
   #output <- mbind(output,reportLCOE(gdx)[,t,])     now moved to additional LCOE.mif file because many variables
+  cat("running reportCapitalStock...\n")  
   output <- mbind(output,reportCapitalStock(gdx,regionSubsetList)[,t,])
+  cat("running reportEnergyInvestment...\n")  
   output <- mbind(output,reportEnergyInvestment(gdx,regionSubsetList)[,t,])
+  cat("running reportEmiAirPol...\n") 
   tmp <- try(reportEmiAirPol(gdx,regionSubsetList))  # test whether reportEmiAirPol works
   if(class(tmp)!="try-error") {
      if(!is.null(reportEmiAirPol(gdx,regionSubsetList))) output <- mbind(output, reportEmiAirPol(gdx,regionSubsetList)[,t,])
   } else {cat("function reportEmiAirPol does not work and is skipped \n")}   
   
   # reporting of variables that need variables from different other report functions
+  cat("running reportEmi...\n") 
   output <- mbind(output,reportEmi(gdx,output,regionSubsetList)[,t,])    # needs output from reportFE
+  cat("running reportTechnology...\n") 
   output <- mbind(output,reportTechnology(gdx,output,regionSubsetList)[,t,])    # needs output from reportSE
+  cat("running reportPrices...\n") 
   output <- mbind(output,reportPrices(gdx,gdx_ref,output,regionSubsetList)[,t,]) # needs output from reportSE, reportFE, reportEmi, reportExtraction, reportMacroEconomy  
+  cat("running reportCosts...\n") 
   output <- mbind(output,reportCosts(gdx,output,regionSubsetList)[,t,])  # needs output from reportEnergyInvestment, reportPrices, reportEnergyInvestments
 
   # reporting of cross variables - needs variables from different other report* functions
+  cat("running reportCrossVariables...\n") 
   output <- mbind(output,reportCrossVariables(gdx,output,regionSubsetList)[,t,])
 
   # Report policy costs, if possible and sensible 
