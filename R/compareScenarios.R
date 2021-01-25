@@ -8,7 +8,7 @@
 #' @param y time span for the data in line plots, default: y=c(seq(2005,2060,5),seq(2070,2100,10))
 #' @param y_hist time span for the historical data in the line plots, default: c(seq(1960,2015,1))
 #' @param y_bar time slides for bar plots, default: y_bar=c(2010,2030,2050,2100)
-#' @param reg region(s) in focus, reg ="all_regi" shows all regions if the mifs contain different regions
+#' @param reg region(s) in focus, reg="all_reg" shows all regions if the mifs contain different regions
 #' @param mainReg region to be underlined
 #' @param fileName name of the pdf, default = "CompareScenarios.pdf"
 #' @param sr15marker_RCP if given, show the corresponding marker scenarios (SSP1-5) from the SR15 database in some plots. Requires the sr15data package.
@@ -163,11 +163,17 @@ compareScenarios <- function(mif, hist,
   for(i in 1:length(mif)){
     data_new <- read.report(mif[i],as.list=FALSE)
     if (magclass::getNames(data_new,fulldim = TRUE)[["scenario"]] %in% magclass::getNames(data,fulldim = TRUE)[["scenario"]]) magclass::getNames(data_new) <- gsub(magclass::getNames(data_new,fulldim = TRUE)["scenario"],paste0(magclass::getNames(data_new,fulldim = TRUE)["scenario"],i),magclass::getNames(data_new))
-    if(all(getRegions(data) %in% getRegions(data_new))) {
+    if(all(getRegions(data) %in% getRegions(data_new)) && all(getRegions(data_new) %in% getRegions(data))) {
       data <- mbind(data,data_new)
     } else {
       if(is.null(reg)){
-        stop("the regional aggregation of the results are different, you might use reg='all_reg'")
+        # use the intersect of regions
+        if(!is.null(data)){
+          reg_intersect <- intersect(getRegions(data), getRegions(data_new))
+          data <- mbind(data[reg_intersect,,],data_new[reg_intersect,,])
+        }else{
+          data <- data_new
+        }
       } else if(reg=="all_reg"){
         if(all(getRegions(data_new) %in% getRegions(data))) {
           ## expand data_new by old regions from data
@@ -188,7 +194,6 @@ compareScenarios <- function(mif, hist,
           ## compine old and new data
           data <- mbind(data,data_new)
         }
-
       } else {
         stop("the regional aggregation of the results are different, you might use reg='all_reg'")
       }
