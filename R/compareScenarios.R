@@ -195,7 +195,13 @@ compareScenarios <- function(mif, hist,
           data <- mbind(data,data_new)
         }
       } else {
-        stop("the regional aggregation of the results are different, you might use reg='all_reg'")
+        # use the intersect of regions with reg param
+        reg_intersect <- intersect(reg, getRegions(data_new))
+        if(length(reg_intersect)>0){
+          data <- mbind(data,data_new[reg_intersect,,])
+        }else{
+          warning(paste0(mif, " was not included due to no matching regions"))
+        }
       }
     }
   }
