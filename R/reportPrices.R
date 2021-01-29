@@ -218,12 +218,13 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   }
   getSets(fe_taxCES) = gsub("all_enty","all_in", getSets(fe_taxCES))
   getSets(fe_subCES) = gsub("all_enty","all_in", getSets(fe_subCES))
-  if (!is.null(all_esty)){
-  fe_taxES =  readGDX(gdx, name=c("pm_tau_fe_tax_ES_st",'p21_tau_fe_tax_ES_st'),format = "first_found", react = "silent")
-  fe_subES =  readGDX(gdx, name=c('pm_tau_fe_sub_ES_st','p21_tau_fe_sub_ES_st'),format = "first_found", react = "silent")
-  
-  getSets(fe_taxES) = gsub("all_esty","all_in", getSets(fe_taxES))
-  getSets(fe_subES) = gsub("all_esty","all_in", getSets(fe_subES))
+  if (!is.null(all_esty) ){
+    fe_taxES =  readGDX(gdx, name=c("pm_tau_fe_tax_ES_st",'p21_tau_fe_tax_ES_st'),format = "first_found", react = "silent")
+    fe_subES =  readGDX(gdx, name=c('pm_tau_fe_sub_ES_st','p21_tau_fe_sub_ES_st'),format = "first_found", react = "silent")
+    if (!is.null(fe_taxES)){
+      getSets(fe_taxES) = gsub("all_esty","all_in", getSets(fe_taxES))
+      getSets(fe_subES) = gsub("all_esty","all_in", getSets(fe_subES))
+    }
   } else {
     fe_taxES = NULL
     fe_subES = NULL
