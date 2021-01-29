@@ -410,73 +410,77 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
   }
   
   if (buil_mod == "simple"){
-  tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feels.feelb"], "Price|Final Energy|Electricity|Buildings (US$2005/GJ)"))
-  tmp <- mbind(tmp,setNames(lowpass(prices_fe_bi[,,"feels.feelb"], fix="both", altFilter=match(2010,time), warn = FALSE)  , "Price|Final Energy|Electricity|Buildings|Moving Avg (US$2005/GJ)"))
-  tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fegas.fegab"], "Price|Final Energy|Gases|Buildings (US$2005/GJ)"))
-  tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehes.feheb"], "Price|Final Energy|Heat|Buildings (US$2005/GJ)"))
-  tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehos.fehob"], "Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"))
-  tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feh2s.feh2b"], "Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"))  
-  tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fesos.fesob"], "Price|Final Energy|Solids|Buildings (US$2005/GJ)"))
-  tmp = compute_agg_price_fe(tmp,output,"Buildings")
+  # FS: temporarily comment out all instances of prices_fe_bi because dimensions of the object were changed, 
+  # redo price reporting anyways at some point;
+  # in the meantime please serach use FE price variables with label "w/ cost for emissions" and
+ 
+   # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feels.feelb"], "Price|Final Energy|Electricity|Buildings (US$2005/GJ)"))
+  # tmp <- mbind(tmp,setNames(lowpass(prices_fe_bi[,,"feels.feelb"], fix="both", altFilter=match(2010,time), warn = FALSE)  , "Price|Final Energy|Electricity|Buildings|Moving Avg (US$2005/GJ)"))
+  # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fegas.fegab"], "Price|Final Energy|Gases|Buildings (US$2005/GJ)"))
+  # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehes.feheb"], "Price|Final Energy|Heat|Buildings (US$2005/GJ)"))
+  # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehos.fehob"], "Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"))
+  # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feh2s.feh2b"], "Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"))  
+  # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fesos.fesob"], "Price|Final Energy|Solids|Buildings (US$2005/GJ)"))
+  # tmp = compute_agg_price_fe(tmp,output,"Buildings")
   }
   
   if (buil_mod %in% c("services_putty", "services_with_capital")){
-    # Prices across energy services should be identical, so we take the price from only one service (cooking and water heating)
-    tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feels.uecwelb"], "Price|Final Energy|Electricity|Buildings (US$2005/GJ)"))
-    tmp <- mbind(tmp,setNames(lowpass(prices_fe_bi[,,"feels.uecwelb"], fix="both", altFilter=match(2010,time), warn = FALSE)  , "Price|Final Energy|Electricity|Buildings|Moving Avg (US$2005/GJ)"))
-    tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fegas.uecwgab"], "Price|Final Energy|Gases|Buildings (US$2005/GJ)"))
-    tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehes.uecwheb"], "Price|Final Energy|Heat|Buildings (US$2005/GJ)"))
-    tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehos.uecwhob"], "Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"))
-    tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feh2s.uecwh2b"], "Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"))  
-    tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fesos.uecwsob"], "Price|Final Energy|Solids|Buildings (US$2005/GJ)"))
-    
-    tmp = compute_agg_price_fe(tmp,output,"Buildings")
+    # # Prices across energy services should be identical, so we take the price from only one service (cooking and water heating)
+    # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feels.uecwelb"], "Price|Final Energy|Electricity|Buildings (US$2005/GJ)"))
+    # tmp <- mbind(tmp,setNames(lowpass(prices_fe_bi[,,"feels.uecwelb"], fix="both", altFilter=match(2010,time), warn = FALSE)  , "Price|Final Energy|Electricity|Buildings|Moving Avg (US$2005/GJ)"))
+    # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fegas.uecwgab"], "Price|Final Energy|Gases|Buildings (US$2005/GJ)"))
+    # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehes.uecwheb"], "Price|Final Energy|Heat|Buildings (US$2005/GJ)"))
+    # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fehos.uecwhob"], "Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"))
+    # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"feh2s.uecwh2b"], "Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"))  
+    # tmp <- mbind(tmp,setNames(prices_fe_bi[,,"fesos.uecwsob"], "Price|Final Energy|Solids|Buildings (US$2005/GJ)"))
+    # 
+    # tmp = compute_agg_price_fe(tmp,output,"Buildings")
   
   }
   
   if (indu_mod %in% c('fixed_shares', 'subsectors')) {
-    industry_fe_mixer <- inner_join(
-      fe2ppfen37,
-      paste(
-        'all_enty,   fe',
-        'fesos,      Solids',
-        'fehos,      Heating Oil',
-        'fegas,      Gases',
-        'feh2s,      Hydrogen',
-        'fehes,      Heat',
-        'feels,      Electricity',
-        sep = '\n') %>% 
-        read_csv(),
-      'all_enty'
-    )
-    
-    
-    for (.fe in unique(industry_fe_mixer$fe)) {
-      fe2ppfen <- industry_fe_mixer %>% 
-        filter(.data$fe == .fe) %>% 
-        distinct(.data$all_enty, .keep_all = TRUE) %>% 
-        select(-.data$fe) %>%
-        paste(collapse = '.')
-      
-      tmp <- mbind(
-        tmp,
-        setNames(
-          prices_fe_bi[,,fe2ppfen], 
-          paste0('Price|Final Energy|', .fe, '|Industry (US$2005/GJ)')
-        )
-      )
-      tmp <- mbind(
-        tmp,
-        setNames(
-          lowpass(prices_fe_bi[,,fe2ppfen] , fix="both", altFilter=match(2010,time), warn = FALSE) , 
-          paste0('Price|Final Energy|', .fe, '|Industry|Moving Avg (US$2005/GJ)')
-        )
-      )
-    }
-	
-	rm(industry_fe_mixer, fe2ppfen)
-	
-	tmp = compute_agg_price_fe(tmp,output,"Industry")
+#     industry_fe_mixer <- inner_join(
+#       fe2ppfen37,
+#       paste(
+#         'all_enty,   fe',
+#         'fesos,      Solids',
+#         'fehos,      Heating Oil',
+#         'fegas,      Gases',
+#         'feh2s,      Hydrogen',
+#         'fehes,      Heat',
+#         'feels,      Electricity',
+#         sep = '\n') %>% 
+#         read_csv(),
+#       'all_enty'
+#     )
+#     
+#     
+#     for (.fe in unique(industry_fe_mixer$fe)) {
+#       fe2ppfen <- industry_fe_mixer %>% 
+#         filter(.data$fe == .fe) %>% 
+#         distinct(.data$all_enty, .keep_all = TRUE) %>% 
+#         select(-.data$fe) %>%
+#         paste(collapse = '.')
+#       
+#       tmp <- mbind(
+#         tmp,
+#         setNames(
+#           prices_fe_bi[,,fe2ppfen], 
+#           paste0('Price|Final Energy|', .fe, '|Industry (US$2005/GJ)')
+#         )
+#       )
+#       tmp <- mbind(
+#         tmp,
+#         setNames(
+#           lowpass(prices_fe_bi[,,fe2ppfen] , fix="both", altFilter=match(2010,time), warn = FALSE) , 
+#           paste0('Price|Final Energy|', .fe, '|Industry|Moving Avg (US$2005/GJ)')
+#         )
+#       )
+#     }
+# 	
+# 	rm(industry_fe_mixer, fe2ppfen)
+# 	
+# 	tmp = compute_agg_price_fe(tmp,output,"Industry")
 	}
 	
   # } else {
@@ -960,35 +964,35 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
                  )
    
   }
-  if (buil_mod %in% c("simple", "services_putty","services_with_capital")){
-    int2ext <- c(int2ext,c(
-                 "Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"            = "FE|Buildings|Liquids (EJ/yr)",
-                 "Price|Final Energy|Gases|Buildings (US$2005/GJ)"                  = "FE|Buildings|Gases (EJ/yr)",
-                 "Price|Final Energy|Solids|Buildings (US$2005/GJ)"                 = "FE|Buildings|Solids (EJ/yr)",
-                 "Price|Final Energy|Heat|Buildings (US$2005/GJ)"                   = "FE|Buildings|Heat (EJ/yr)",
-                 "Price|Final Energy|Electricity|Buildings (US$2005/GJ)"            = "FE|Buildings|Electricity (EJ/yr)",
-                 "Price|Final Energy|Electricity|Buildings|Moving Avg (US$2005/GJ)" = "FE|Buildings|Electricity (EJ/yr)",
-                 "Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"               = "FE|Buildings|Hydrogen (EJ/yr)",
-                 "Price|Final Energy|Buildings (US$2005/GJ)"                        = "FE|Buildings (EJ/yr)",
-                 "Price|Final Energy|Buildings|Moving Avg (US$2005/GJ)"             = "FE|Buildings (EJ/yr)"
-    ))
-  }
-  if (indu_mod %in% c('fixed_shares', 'subsectors')){
-    int2ext <- c(int2ext,c(
-                 "Price|Final Energy|Heating Oil|Industry (US$2005/GJ)"             = "FE|Industry|Liquids (EJ/yr)",
-                 "Price|Final Energy|Gases|Industry (US$2005/GJ)"                   = "FE|Industry|Gases (EJ/yr)",
-                 "Price|Final Energy|Solids|Industry (US$2005/GJ)"                  = "FE|Industry|Solids (EJ/yr)",
-                 "Price|Final Energy|Heat|Industry (US$2005/GJ)"                    = "FE|Industry|Heat (EJ/yr)",
-                 "Price|Final Energy|Electricity|Industry (US$2005/GJ)"             = "FE|Industry|Electricity (EJ/yr)",
-                 "Price|Final Energy|Hydrogen|Industry (US$2005/GJ)"                = "FE|Industry|Hydrogen (EJ/yr)",
-                 "Price|Final Energy|Industry (US$2005/GJ)"                         = "FE|Industry (EJ/yr)",
-                 "Price|Final Energy|Industry|Moving Avg (US$2005/GJ)"              = "FE|Industry (EJ/yr)"
-                 ))
-  }
-  if("fegat" %in% getNames(febal.m)){
-    int2ext <- c(int2ext, "Price|Final Energy|Gases|Transport (US$2005/GJ)"       = "FE|Transport|Gases (EJ/yr)")
-  }
-
+  # if (buil_mod %in% c("simple", "services_putty","services_with_capital")){
+  #   int2ext <- c(int2ext,c(
+  #                "Price|Final Energy|Heating Oil|Buildings (US$2005/GJ)"            = "FE|Buildings|Liquids (EJ/yr)",
+  #                "Price|Final Energy|Gases|Buildings (US$2005/GJ)"                  = "FE|Buildings|Gases (EJ/yr)",
+  #                "Price|Final Energy|Solids|Buildings (US$2005/GJ)"                 = "FE|Buildings|Solids (EJ/yr)",
+  #                "Price|Final Energy|Heat|Buildings (US$2005/GJ)"                   = "FE|Buildings|Heat (EJ/yr)",
+  #                "Price|Final Energy|Electricity|Buildings (US$2005/GJ)"            = "FE|Buildings|Electricity (EJ/yr)",
+  #                "Price|Final Energy|Electricity|Buildings|Moving Avg (US$2005/GJ)" = "FE|Buildings|Electricity (EJ/yr)",
+  #                "Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"               = "FE|Buildings|Hydrogen (EJ/yr)",
+  #                "Price|Final Energy|Buildings (US$2005/GJ)"                        = "FE|Buildings (EJ/yr)",
+  #                "Price|Final Energy|Buildings|Moving Avg (US$2005/GJ)"             = "FE|Buildings (EJ/yr)"
+  #   ))
+  # }
+  # if (indu_mod %in% c('fixed_shares', 'subsectors')){
+  #   int2ext <- c(int2ext,c(
+  #                "Price|Final Energy|Heating Oil|Industry (US$2005/GJ)"             = "FE|Industry|Liquids (EJ/yr)",
+  #                "Price|Final Energy|Gases|Industry (US$2005/GJ)"                   = "FE|Industry|Gases (EJ/yr)",
+  #                "Price|Final Energy|Solids|Industry (US$2005/GJ)"                  = "FE|Industry|Solids (EJ/yr)",
+  #                "Price|Final Energy|Heat|Industry (US$2005/GJ)"                    = "FE|Industry|Heat (EJ/yr)",
+  #                "Price|Final Energy|Electricity|Industry (US$2005/GJ)"             = "FE|Industry|Electricity (EJ/yr)",
+  #                "Price|Final Energy|Hydrogen|Industry (US$2005/GJ)"                = "FE|Industry|Hydrogen (EJ/yr)",
+  #                "Price|Final Energy|Industry (US$2005/GJ)"                         = "FE|Industry (EJ/yr)",
+  #                "Price|Final Energy|Industry|Moving Avg (US$2005/GJ)"              = "FE|Industry (EJ/yr)"
+  #                ))
+  # }
+  # if("fegat" %in% getNames(febal.m)){
+  #   int2ext <- c(int2ext, "Price|Final Energy|Gases|Transport (US$2005/GJ)"       = "FE|Transport|Gases (EJ/yr)")
+  # }
+  # 
 
   
   output[is.na(output)] <- 0  # substitute na by 0
