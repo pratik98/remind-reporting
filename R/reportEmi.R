@@ -673,7 +673,7 @@ reportEmi <- function(gdx, output=NULL, regionSubsetList=NULL){
     vm_emiIndCCS   <- vm_emiIndCCS[,yy,]
     
     
-    indstFEdem <- dimReduce(vm_demFeSector[,,"indst"])
+    indstFEdem <- collapseNames(vm_demFeSector[,,"indst"])
     indstCCS   <- dimSums(vm_emiIndCCS[,,]) 
     
     indst_df <- merge(as.quitte(indstFEdem[,,intersect(getNames(indstFEdem,dim=2),getNames(pm_emifac,dim=2))])[,-c(1,2,4,5)],as.quitte(pm_emifac[,,intersect(getNames(indstFEdem,dim=2),getNames(pm_emifac,dim=2))])[,-c(1,2,4,5)],by=c("all_enty","all_enty1","region","period"))
