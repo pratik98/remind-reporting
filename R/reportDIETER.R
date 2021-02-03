@@ -22,18 +22,24 @@ reportDIETER <- function(dieterDatafile = "report_DIETER.gdx",output_dir=".",inp
   # dieterData = "report_DIETER.gdx"
   dieterData = dieterDatafile
   if(is.null(remind_root)){
-    remind_root <- file.path(output_folder, "../..")
+    remind_root <- file.path(output_dir, "../..")
   }
-  require(quitte)
-  require(gdxrrw)
-  require(tidyverse)
-  require(data.table)
+ #require(quitte)
+ #require(gdxrrw)
+  #require(tidyverse)
+  #require(data.table)
   
-  #igdx("C:\\GAMS\\win64\\31.1")#GAMS directory
+  
+  sub_folder = "Dieter/"
+  datapath <- function(fname){
+    file.path(output_dir, sub_folder, fname)
+  }
+  
   
   
   gdxToQuitte_hourly <- function(gdxfile){
-    file = gdxfile
+   # file = gdxfile
+    file =datapath(fname=gdxfile)
     out_hourly <- NULL
     
     ######################################################################################################################## 
@@ -99,7 +105,8 @@ reportDIETER <- function(dieterDatafile = "report_DIETER.gdx",output_dir=".",inp
   }
   
   gdxToQuitte_annual <- function(gdxfile){
-    file = gdxfile
+    #file = gdxfile
+    file =datapath(fname=gdxfile)
     out_annual <- NULL
     ###########################################################################################################################
     rep = read.gdx(gdxName = file, requestList = 'report', factors = FALSE, squeeze = FALSE) 
