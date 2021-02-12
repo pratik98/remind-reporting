@@ -860,7 +860,15 @@ reportPrices <- function(gdx,gdx_ref=NULL,output=NULL,regionSubsetList=NULL) {
                 setNames(FeIndst.m[,,"fesos.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
                          "Price|Final Energy|Solids|Industry|w/ costs for emissions|ESD (US$2005/GJ)"),
                 setNames(FeIndst.m[,,"fesos.ETS"] / (budget.m+1e-10) * tdptwyr2dpgj, 
-                         "Price|Final Energy|Solids|Industry|w/ costs for emissions|ETS (US$2005/GJ)"))
+                         "Price|Final Energy|Solids|Industry|w/ costs for emissions|ETS (US$2005/GJ)"),
+               setNames(FeIndst.m[,,"feh2s.ETS"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                        "Price|Final Energy|Hydrogen|Industry|w/ costs for emissions|ETS (US$2005/GJ)"),
+               setNames(FeIndst.m[,,"feh2s.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                        "Price|Final Energy|Hydrogen|Industry|w/ costs for emissions|ESD (US$2005/GJ)"),
+               setNames(FeBuild.m[,,"feh2s.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                        "Price|Final Energy|Hydrogen|Buildings|w/ costs for emissions|ESD (US$2005/GJ)"),
+               setNames(FeTrans.m[,,"feh2t.ES"] / (budget.m+1e-10) * tdptwyr2dpgj, 
+                        "Price|Final Energy|Hydrogen|Transport|w/ costs for emissions|ESD (US$2005/GJ)"))
   
   
   
