@@ -1069,13 +1069,15 @@ compareScenarios <- function(mif, hist,
   swlatex(sw,"\\subsubsection{FE Prices}")
 
   ## ---- Prices FE Liquids ----
-
+  if("Price|Final Energy|Liquids|Transport (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
   p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Liquids|Transport (US$2005/GJ)"],x_hist=NULL,
                          ylab='Price|Final Energy|Liquids|Transport [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
+  
   p <- mipLineHistorical(data[,,"Price|Final Energy|Liquids|Transport (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Price|Final Energy|Liquids|Transport [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
+  }
 
   p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
                          ylab='Price|Final Energy|Liquids|Transport|LDV|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1150,6 +1152,7 @@ compareScenarios <- function(mif, hist,
     swfigure(sw,print,p,sw_option="height=9,width=8")
   }
 
+  
   p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD (US$2005/GJ)"],x_hist=NULL,
                          ylab='Price|Final Energy|Gases|Industry|w/ costs for emissions|ESD [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
@@ -1159,19 +1162,18 @@ compareScenarios <- function(mif, hist,
   
   ## ---- Prices FE Hydrogen ----
   
+  if("Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){ 
   p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"],x_hist=NULL,
                          ylab='Price|Final Energy|Hydrogen|Buildings [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"Price|Final Energy|Hydrogen|Buildings (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='Price|Final Energy|Hydrogen|Buildings [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
+  }
   
+  if("Price|Final Energy|Hydrogen|Industry (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){ 
   p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Hydrogen|Industry (US$2005/GJ)"],x_hist=NULL,
                          ylab='Price|Final Energy|Hydrogen|Industry [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"Price|Final Energy|Hydrogen|Industry (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='Price|Final Energy|Hydrogen|Industry [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
+  }
+
   
   
   ## ---- Prices FE Solids ----
@@ -1195,14 +1197,12 @@ compareScenarios <- function(mif, hist,
   }
 
   ## ---- Prices FE Electricity ----
-
+  if("Price|Final Energy|Electricity|Transport (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
   p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Electricity|Transport (US$2005/GJ)"],x_hist=NULL,
                          ylab='Price|Final Energy|Electricity|Transport [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
-  p <- mipLineHistorical(data[,,"Price|Final Energy|Electricity|Transport (US$2005/GJ)"][mainReg,,,invert=TRUE],x_hist=NULL,
-                         ylab='Price|Final Energy|Electricity|Transport [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
-  swfigure(sw,print,p,sw_option="height=9,width=8")
-
+  }
+  
   if("Price|Final Energy|Electricity|Buildings (US$2005/GJ)" %in% magclass::getNames(data,dim=3)){
     p <- mipLineHistorical(data[mainReg,,"Price|Final Energy|Electricity|Buildings (US$2005/GJ)"],x_hist=NULL,
                            ylab='Price|Final Energy|Electricity|Buildings [US$2005/GJ]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1456,12 +1456,14 @@ compareScenarios <- function(mif, hist,
   swfigure(sw,print,p,sw_option="height=9,width=8")
   
   swlatex(sw,"\\subsubsection{Electricity}")
+  if("Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)" %in% magclass::getNames(data,dim=3)){
   p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"],
                          ylab='Emi|CO2|Energy|Supply|Electricity [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
   p <- mipLineHistorical(data[,,"Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=hist[,,"Emi|CO2|Energy|Supply|Electricity (Mt CO2/yr)"][mainReg,,,invert=TRUE],
                          ylab='Emi|CO2|Energy|Supply|Electricity [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
+  }
   
   swlatex(sw,"\\subsubsection{Buildings}")
   p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Buildings|Direct (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Buildings|Direct (Mt CO2/yr)"],
@@ -1492,6 +1494,7 @@ compareScenarios <- function(mif, hist,
                          ylab='Emi|CO2|Transport|Demand [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
   
+ 
   p <- mipLineHistorical(data[mainReg,,"Emi|CO2|FFaI|Industry|Process (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|FFaI|Industry|Process (Mt CO2/yr)"],
                          ylab='Emi|CO2|FFaI|Industry|Process [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
   swfigure(sw,print,p,sw_option="height=8,width=8")
@@ -1499,6 +1502,7 @@ compareScenarios <- function(mif, hist,
                          ylab='Emi|CO2|FFaI|Industry|Process [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
   
+  if("Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)" %in% magclass::getNames(hist,dim=3)){
   p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],
 # p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=NULL,
                          ylab='Emi|CO2|Gross Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1507,7 +1511,10 @@ compareScenarios <- function(mif, hist,
 #  p <- mipLineHistorical(data[,,"Emi|CO2|Gross Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Emi|CO2|Gross Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
+  }
 
+  if("Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)" %in% magclass::getNames(data,dim=3) & 
+     "Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)" %in% magclass::getNames(hist,dim=3)){
   p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],
 #  p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"],x_hist=NULL,
                          ylab='Emi|CO2|Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
@@ -1516,6 +1523,7 @@ compareScenarios <- function(mif, hist,
 #  p <- mipLineHistorical(data[,,"Emi|CO2|Fossil Fuels and Industry (Mt CO2/yr)"][mainReg,,,invert=TRUE],x_hist=NULL,
                          ylab='Emi|CO2|Fossil Fuels and Industry [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"),facet.ncol=3)
   swfigure(sw,print,p,sw_option="height=9,width=8")
+  }
 
   p <- mipLineHistorical(data[mainReg,,"Emi|CO2|Land-Use Change (Mt CO2/yr)"],x_hist=hist[mainReg,,"Emi|CO2|Land Use (Mt CO2/yr)"],
                          ylab='Emi|CO2|Land-Use Change [Mt CO2/yr]',scales="free_y",plot.priority=c("x_hist","x","x_proj"))
